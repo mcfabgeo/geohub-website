@@ -75,9 +75,8 @@ img {
 
 .brand-logo {
   display: block;
-  width: 210px;
-  height: auto;
-  max-height: 96px;
+  width: auto;
+  height: 86px;
   object-fit: contain;
 }
 
@@ -419,8 +418,7 @@ h3 {
   }
 
   .brand-logo {
-    width: 184px;
-    max-height: 82px;
+    height: 74px;
   }
 
   .site-nav {
@@ -447,8 +445,7 @@ h3 {
   }
 
   .brand-logo {
-    width: 156px;
-    max-height: 70px;
+    height: 64px;
   }
 
   .site-nav {

@@ -11,7 +11,6 @@
   --shadow: 0 24px 70px rgba(8, 26, 43, 0.12);
   --radius: 22px;
   --container: 1120px;
-  --wordmark-image: url("img/geohub-wordmark.svg");
 }
 
 * {
@@ -74,18 +73,12 @@ img {
   flex: 0 0 auto;
 }
 
-.brand-logo,
-.hero-visual-logo {
-  background-image: var(--wordmark-image);
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
-}
-
 .brand-logo {
   display: block;
-  width: 200px;
-  height: 88px;
+  width: 210px;
+  height: auto;
+  max-height: 96px;
+  object-fit: contain;
 }
 
 .site-nav {
@@ -267,8 +260,9 @@ h3 {
   z-index: 1;
   width: 100%;
   max-width: 560px;
-  aspect-ratio: 620 / 421;
+  height: auto;
   margin: 0 auto;
+  object-fit: contain;
 }
 
 .hero-panel {
@@ -425,8 +419,8 @@ h3 {
   }
 
   .brand-logo {
-    width: 172px;
-    height: 72px;
+    width: 184px;
+    max-height: 82px;
   }
 
   .site-nav {
@@ -453,8 +447,8 @@ h3 {
   }
 
   .brand-logo {
-    width: 144px;
-    height: 60px;
+    width: 156px;
+    max-height: 70px;
   }
 
   .site-nav {

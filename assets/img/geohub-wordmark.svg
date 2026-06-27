@@ -1,35 +1,73 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="620" height="180" viewBox="0 0 620 180" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="620" height="421" viewBox="0 0 620 421" role="img" aria-labelledby="title desc">
   <title id="title">Logo GEO-HUB</title>
-  <desc id="desc">Marchio GEO-HUB con simbolo globo e wordmark</desc>
+  <desc id="desc">Marchio GEO-HUB con globo stilizzato sopra e scritta GEO-HUB sotto</desc>
   <defs>
     <style>
-      .dark { stroke: #0f2338; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-      .blue { stroke: #187fd1; fill: none; stroke-linecap: round; }
-      .green { stroke: #52b61f; fill: none; stroke-linecap: round; }
-      .dot-blue { fill: #187fd1; }
-      .dot-green { fill: #52b61f; }
-      .dot-orange { fill: #f4a621; }
-      .geo { fill: #0f2338; }
-      .hub { fill: #52b61f; }
-      text { font-family: Manrope, Arial, sans-serif; font-weight: 800; letter-spacing: 1px; }
+      .dark {
+        stroke: #0f2338;
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .blue {
+        stroke: #187fd1;
+        fill: none;
+        stroke-linecap: round;
+      }
+
+      .green {
+        stroke: #52b61f;
+        fill: none;
+        stroke-linecap: round;
+      }
+
+      .dot-blue {
+        fill: #187fd1;
+      }
+
+      .dot-green {
+        fill: #52b61f;
+      }
+
+      .dot-orange {
+        fill: #f4a621;
+      }
+
+      .geo {
+        fill: #0f2338;
+      }
+
+      .hub {
+        fill: #52b61f;
+      }
+
+      text {
+        font-family: Manrope, Montserrat, Arial, sans-serif;
+        font-weight: 800;
+        letter-spacing: 7px;
+      }
     </style>
   </defs>
 
-  <g transform="translate(20 8)">
-    <path class="blue" stroke-width="7" d="M116 15c-27 5-53 24-69 52-10 17-15 29-18 43" />
-    <path class="green" stroke-width="7" d="M39 123c9 22 27 40 48 51 20 11 42 14 65 12 14-2 31-8 44-17" />
-    <path class="dark" stroke-width="8" d="M179 57c12 12 20 28 21 46 2 18-3 36-12 52" />
-    <path class="dark" stroke-width="7" d="M67 137c9 29 30 52 59 64" />
-    <path class="dark" stroke-width="7" d="M77 51c28-28 73-40 109-23 10 5 20 12 28 21" />
-    <ellipse class="dark" stroke-width="7" cx="118" cy="88" rx="27" ry="64" />
-    <path class="dark" stroke-width="7" d="M63 86c36-16 94-17 138-2" />
-    <path class="dark" stroke-width="7" d="M102 24c-22 23-31 54-25 86 5 26 18 48 37 65" />
-    <path class="dark" stroke-width="7" d="M142 24c20 19 33 48 34 80 1 22-5 44-17 62" />
-    <circle class="dot-blue" cx="180" cy="41" r="10" />
-    <circle class="dot-green" cx="46" cy="90" r="10" />
-    <circle class="dot-orange" cx="181" cy="133" r="10" />
+  <rect width="620" height="421" fill="#ffffff"/>
+
+  <g transform="translate(176 18) scale(1.16)">
+    <path class="blue" stroke-width="10" d="M54 88c11-35 38-64 74-78 33-13 72-10 103 8"/>
+    <path class="green" stroke-width="10" d="M62 186c16 37 51 65 94 72 31 5 62 0 89-15"/>
+    <path class="dark" stroke-width="11" d="M92 97c9-49 44-87 90-96"/>
+    <path class="dark" stroke-width="11" d="M236 70c23 26 35 61 30 98-2 14-7 28-14 41"/>
+    <path class="dark" stroke-width="10" d="M99 191c15 34 47 59 84 66"/>
+    <path class="dark" stroke-width="10" d="M96 96c40-42 105-45 147-8"/>
+    <ellipse class="dark" stroke-width="10" cx="173" cy="135" rx="42" ry="96"/>
+    <path class="dark" stroke-width="10" d="M88 139c54-24 136-25 194-2"/>
+    <path class="dark" stroke-width="10" d="M145 31c-34 40-45 94-31 146 9 34 30 62 60 79"/>
+    <path class="dark" stroke-width="10" d="M197 31c33 33 51 80 49 128-1 27-8 53-22 76"/>
+    <circle class="dot-blue" cx="244" cy="55" r="18"/>
+    <circle class="dot-green" cx="83" cy="139" r="18"/>
+    <circle class="dot-orange" cx="246" cy="199" r="18"/>
   </g>
 
-  <text x="18" y="170" font-size="78" class="geo">GEO-</text>
-  <text x="257" y="170" font-size="78" class="hub">HUB</text>
+  <text x="50" y="377" font-size="86" class="geo">GEO-</text>
+  <text x="335" y="377" font-size="86" class="hub">HUB</text>
 </svg>

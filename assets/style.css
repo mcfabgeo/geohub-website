@@ -772,7 +772,7 @@ h3 {
 
 .tools-logo-grid {
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 0.9rem;
   align-items: stretch;
 }

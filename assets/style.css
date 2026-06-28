@@ -630,3 +630,98 @@ h3 {
     grid-template-columns: 1fr;
   }
 }
+/* Hero: logo meno dominante e card più editoriale */
+.hero-identity-card {
+  align-items: flex-start;
+  justify-content: flex-start;
+  min-height: auto;
+  gap: 1.2rem;
+  padding: 1.6rem;
+}
+
+.hero-logo-frame {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: min(260px, 70%);
+  padding: 0.9rem 1rem;
+  border-radius: 1.2rem;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid var(--border);
+}
+
+.hero-identity-card .hero-visual-logo {
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  margin: 0;
+}
+
+.hero-identity-text {
+  max-width: 520px;
+}
+
+.hero-identity-text h2 {
+  margin: 0.45rem 0 0.7rem;
+  color: var(--primary);
+  font-size: clamp(1.35rem, 2vw, 2rem);
+  line-height: 1.15;
+}
+
+.hero-identity-text p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.hero-mini-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.2rem;
+}
+
+.hero-mini-list span {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.55rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(30, 138, 99, 0.10);
+  color: var(--primary);
+  border: 1px solid rgba(30, 138, 99, 0.18);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 980px) {
+  .hero-logo-frame {
+    width: min(230px, 70%);
+  }
+
+  .hero-identity-card .hero-visual-logo {
+    max-width: 200px;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-identity-card {
+    padding: 1.2rem;
+  }
+
+  .hero-logo-frame {
+    width: min(210px, 82%);
+  }
+
+  .hero-identity-card .hero-visual-logo {
+    max-width: 180px;
+  }
+
+  .hero-mini-list {
+    gap: 0.5rem;
+  }
+
+  .hero-mini-list span {
+    font-size: 0.84rem;
+  }
+}

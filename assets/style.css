@@ -740,3 +740,16 @@ h3 {
 .hero-logo-frame-clean {
   width: min(170px, 44%);
 }
+/* Fix definitivo: ingrandisce il logo nella card hero destra */
+.hero-identity-card .hero-logo-frame,
+.hero-identity-card .hero-logo-frame-clean {
+  width: 150px !important;
+  max-width: 150px !important;
+  min-width: 150px !important;
+}
+
+.hero-identity-card .hero-visual-logo {
+  width: 150px !important;
+  max-width: 150px !important;
+  height: auto !important;
+}

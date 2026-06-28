@@ -1010,3 +1010,14 @@ h3 {
   max-width: 125px !important;
   max-height: 58px !important;
 }
+/* Ingrandimento mirato loghi tecnologie */
+.tool-logo-card img[alt="PostgreSQL"] {
+  max-width: 145px !important;
+  max-height: 70px !important;
+}
+
+.tool-logo-card img[alt="uMap"],
+.tool-logo-card img[alt="GeoNetwork"] {
+  max-width: 160px !important;
+  max-height: 72px !important;
+}

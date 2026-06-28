@@ -732,3 +732,11 @@ h3 {
   padding: 0;
   width: min(210px, 62%);
 }
+/* Hero: logo nella card destra leggermente più grande */
+.hero-identity-card .hero-visual-logo {
+  max-width: 120px;
+}
+
+.hero-logo-frame-clean {
+  width: min(140px, 38%);
+}

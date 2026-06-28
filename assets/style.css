@@ -830,3 +830,46 @@ h3 {
     max-height: 40px;
   }
 }
+/* Fix mobile hero card: evita tagli laterali delle pillole */
+@media (max-width: 640px) {
+  .hero-identity-card {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    overflow: hidden !important;
+  }
+
+  .hero-identity-card .hero-logo-frame,
+  .hero-identity-card .hero-logo-frame-clean {
+    width: 150px !important;
+    max-width: 150px !important;
+    min-width: auto !important;
+  }
+
+  .hero-identity-card .hero-visual-logo {
+    width: 150px !important;
+    max-width: 150px !important;
+    height: auto !important;
+  }
+
+  .hero-identity-text {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .hero-mini-list {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 0.55rem !important;
+    margin-top: 0.8rem !important;
+  }
+
+  .hero-mini-list span {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    justify-content: flex-start !important;
+    white-space: normal !important;
+    text-align: left !important;
+  }
+}

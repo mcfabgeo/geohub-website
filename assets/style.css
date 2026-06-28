@@ -1004,3 +1004,9 @@ h3 {
   max-width: 150px !important;
   max-height: 68px !important;
 }
+/* Rifinitura dimensioni loghi tecnologie */
+.tool-logo-card img[alt="PostgreSQL"],
+.tool-logo-card img[alt="MapStore"] {
+  max-width: 125px !important;
+  max-height: 58px !important;
+}

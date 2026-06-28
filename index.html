@@ -345,8 +345,28 @@
   <img src="assets/img/logo-merginmaps.png" alt="Mergin Maps">
   <span>Mergin Maps</span>
 </div>
+    <div class="tool-logo-card">
+      <img src="assets/img/logo-nextgis.png" alt="NextGIS">
+      <span>NextGIS</span>
+    </div>
+
+    <div class="tool-logo-card">
+      <img src="assets/img/logo-umap.png" alt="uMap">
+      <span>uMap</span>
+    </div>
+
+    <div class="tool-logo-card">
+      <img src="assets/img/logo-geonetwork.png" alt="GeoNetwork">
+      <span>GeoNetwork</span>
+    </div>
+
+    <div class="tool-logo-card">
+      <img src="assets/img/logo-mapstore.png" alt="MapStore">
+      <span>MapStore</span>
+    </div>
   </div>
 </div>
+
 </section>
 
     <section id="perche" class="section">
@@ -418,5 +438,16 @@
       <p>Servizi GIS, WebGIS e infrastrutture geospaziali per Comuni ed enti pubblici.</p>
     </div>
   </footer>
+<script>
+  function scrollTools(direction) {
+    const strip = document.getElementById('toolsLogoScroll');
+    if (!strip) return;
+
+    strip.scrollBy({
+      left: direction * 320,
+      behavior: 'smooth'
+    });
+  }
+</script>
 </body>
 </html>

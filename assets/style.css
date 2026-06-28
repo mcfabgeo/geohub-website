@@ -873,3 +873,127 @@ h3 {
     text-align: left !important;
   }
 }
+/* Fascia loghi tecnologie scrollabile */
+.tools-strip {
+  margin-top: 2.6rem;
+  padding: 1.4rem;
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.tools-strip-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.1rem;
+}
+
+.tools-strip-title {
+  margin: 0;
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.tools-scroll-controls {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.tools-scroll-button {
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 999px;
+  border: 1px solid rgba(11, 45, 76, 0.16);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--primary);
+  font-size: 1.1rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(11, 45, 76, 0.08);
+}
+
+.tools-scroll-button:hover {
+  background: rgba(30, 138, 99, 0.10);
+}
+
+.tools-logo-scroll {
+  display: flex;
+  gap: 0.9rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  padding-bottom: 0.35rem;
+}
+
+.tools-logo-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.tools-logo-scroll::-webkit-scrollbar-track {
+  background: rgba(11, 45, 76, 0.06);
+  border-radius: 999px;
+}
+
+.tools-logo-scroll::-webkit-scrollbar-thumb {
+  background: rgba(11, 45, 76, 0.22);
+  border-radius: 999px;
+}
+
+.tool-logo-card {
+  flex: 0 0 170px;
+  display: flex;
+  min-height: 104px;
+  padding: 0.9rem 0.7rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(11, 45, 76, 0.08);
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.6rem;
+  text-align: center;
+}
+
+.tool-logo-card img {
+  display: block;
+  max-width: 104px;
+  max-height: 46px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.tool-logo-card span {
+  color: var(--primary);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+@media (max-width: 640px) {
+  .tools-strip {
+    padding: 1.1rem;
+  }
+
+  .tools-strip-header {
+    align-items: flex-start;
+  }
+
+  .tools-strip-title {
+    font-size: 0.95rem;
+  }
+
+  .tool-logo-card {
+    flex-basis: 145px;
+    min-height: 92px;
+  }
+
+  .tool-logo-card img {
+    max-width: 92px;
+    max-height: 40px;
+  }
+}

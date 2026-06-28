@@ -753,3 +753,80 @@ h3 {
   max-width: 150px !important;
   height: auto !important;
 }
+/* Fascia loghi tecnologie */
+.tools-strip {
+  margin-top: 2.6rem;
+  padding: 1.6rem;
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.tools-strip-title {
+  margin: 0 0 1.2rem;
+  color: var(--primary);
+  font-weight: 800;
+  text-align: center;
+}
+
+.tools-logo-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.9rem;
+  align-items: stretch;
+}
+
+.tool-logo-card {
+  display: flex;
+  min-height: 104px;
+  padding: 0.9rem 0.7rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(11, 45, 76, 0.08);
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.6rem;
+  text-align: center;
+}
+
+.tool-logo-card img {
+  display: block;
+  max-width: 96px;
+  max-height: 44px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.tool-logo-card span {
+  color: var(--primary);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+@media (max-width: 1100px) {
+  .tools-logo-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .tools-strip {
+    padding: 1.1rem;
+  }
+
+  .tools-logo-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tool-logo-card {
+    min-height: 92px;
+  }
+
+  .tool-logo-card img {
+    max-width: 88px;
+    max-height: 40px;
+  }
+}

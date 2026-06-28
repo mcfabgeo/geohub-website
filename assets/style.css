@@ -725,3 +725,10 @@ h3 {
     font-size: 0.84rem;
   }
 }
+/* Hero logo senza cornice visibile */
+.hero-logo-frame-clean {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  width: min(210px, 62%);
+}

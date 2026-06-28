@@ -1001,6 +1001,6 @@ h3 {
 .tool-logo-card img[alt="NextGIS"],
 .tool-logo-card img[alt="uMap"],
 .tool-logo-card img[alt="GeoNetwork"] {
-  max-width: 130px !important;
-  max-height: 58px !important;
+  max-width: 150px !important;
+  max-height: 68px !important;
 }

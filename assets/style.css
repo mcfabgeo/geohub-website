@@ -1117,3 +1117,16 @@ h3 {
     width: 100%;
   }
 }
+/* Hover bottoni secondari */
+.button-secondary:hover {
+  background: rgba(234, 244, 242, 0.95);
+  border-color: rgba(30, 138, 99, 0.32);
+  color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(11, 45, 76, 0.07);
+}
+/* Hover bottone principale */
+.button-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(11, 45, 76, 0.18);
+}

@@ -1196,3 +1196,37 @@ h3 {
     grid-template-columns: 1fr;
   }
 }
+/* Sezione contatti: dati societari e piattaforme pubbliche */
+.public-procurement-box {
+  margin-top: 1.6rem;
+  padding: 1.6rem;
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.compact-heading {
+  margin-bottom: 1.2rem;
+}
+
+.procurement-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+}
+
+@media (max-width: 640px) {
+  .public-procurement-box {
+    padding: 1.2rem;
+  }
+
+  .procurement-links {
+    flex-direction: column;
+  }
+
+  .procurement-links .button {
+    width: 100%;
+    justify-content: center;
+  }
+}

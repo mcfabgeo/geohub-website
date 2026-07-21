@@ -1232,17 +1232,21 @@ h3 {
 }
 .about-grid {
   display: grid;
-  grid-template-columns: minmax(280px, 420px) 1fr;
+  grid-template-columns: 360px minmax(0, 1fr);
   gap: 56px;
   align-items: center;
+}
+
+.about-image {
+  width: 100%;
 }
 
 .about-image img {
   display: block;
   width: 100%;
-  aspect-ratio: 4 / 5;
+  height: 480px;
   object-fit: cover;
-  object-position: center;
+  object-position: center 35%;
   border-radius: 28px;
   box-shadow: 0 24px 60px rgba(14, 45, 62, 0.16);
 }
@@ -1255,5 +1259,9 @@ h3 {
 
   .about-image {
     max-width: 480px;
+  }
+
+  .about-image img {
+    height: 560px;
   }
 }

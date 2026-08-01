@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="GeoHub progetta e gestisce infrastrutture digitali per enti, studi tecnici e organizzazioni: server, backup, portali, automazioni e integrazione con sistemi GIS.">
+  <meta name="description" content="GeoHub offre cinque servizi gestiti per studi tecnici, società ambientali e aziende: infrastrutture, dati, mappe, documenti e continuità operativa.">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="it_IT">
   <meta property="og:site_name" content="GeoHub">
   <meta property="og:title" content="GeoHub | Infrastrutture digitali gestite">
-  <meta property="og:description" content="Server, backup, portali documentali, automazioni e integrazione GIS per organizzazioni che lavorano con dati territoriali e tecnici.">
+  <meta property="og:description" content="Cinque servizi per organizzare dati, mappe, documenti e applicazioni senza dover gestire direttamente la parte informatica.">
   <meta property="og:url" content="https://geo-hub.it/infrastrutture-digitali.html">
   <meta property="og:image" content="https://geo-hub.it/assets/img/og-geohub.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="GeoHub | Infrastrutture digitali gestite">
-  <meta name="twitter:description" content="Tecnologia, continuità operativa e integrazione per dati, documenti e servizi GIS.">
+  <meta name="twitter:description" content="Infrastrutture, dati, mappe, documenti e continuità operativa per realtà tecniche e territoriali.">
   <meta name="twitter:image" content="https://geo-hub.it/assets/img/og-geohub.png">
   <title>GeoHub | Infrastrutture digitali gestite</title>
   <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
@@ -28,17 +28,26 @@
     .infra-panel { padding: 32px; border-radius: 24px; background: #f4f8f7; border: 1px solid rgba(20,72,63,.12); }
     .infra-panel ul { margin: 20px 0 0; padding-left: 20px; }
     .infra-panel li { margin: 10px 0; }
-    .infra-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 24px; }
-    .infra-card { padding: 28px; border-radius: 20px; border: 1px solid rgba(20,72,63,.12); background: #fff; }
-    .infra-card h3 { margin-top: 0; }
-    .infra-note { padding: 30px; border-radius: 22px; background: #122e29; color: #fff; }
-    .infra-note p { color: rgba(255,255,255,.84); }
-    .infra-steps { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 20px; }
-    .infra-step { padding: 24px; border-radius: 18px; background: #f7f9f8; }
+    .package-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; }
+    .package-card { padding:30px; border-radius:22px; border:1px solid rgba(20,72,63,.12); background:#fff; box-shadow:0 10px 32px rgba(15,53,47,.05); }
+    .package-card.featured { grid-column:1/-1; background:#122e29; color:#fff; }
+    .package-card.featured p,.package-card.featured li { color:rgba(255,255,255,.84); }
+    .package-label { display:inline-block; margin-bottom:14px; font-size:.78rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:#1c6b5a; }
+    .package-card.featured .package-label { color:#8ed8c6; }
+    .package-card h3 { margin:0 0 12px; font-size:1.45rem; }
+    .package-card ul { margin:18px 0 0; padding-left:20px; }
+    .package-card li { margin:8px 0; }
+    .infra-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
+    .infra-card { padding:28px; border-radius:20px; border:1px solid rgba(20,72,63,.12); background:#fff; }
+    .infra-card h3 { margin-top:0; }
+    .infra-note { padding:30px; border-radius:22px; background:#e9f3f0; }
+    .infra-steps { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:20px; }
+    .infra-step { padding:24px; border-radius:18px; background:#f7f9f8; }
     .infra-step strong { display:block; margin-bottom:10px; }
     .infra-cta { text-align:center; padding:48px; border-radius:28px; background:#e9f3f0; }
     @media (max-width:900px) {
-      .infra-hero-grid,.infra-grid,.infra-steps { grid-template-columns:1fr; }
+      .infra-hero-grid,.package-grid,.infra-grid,.infra-steps { grid-template-columns:1fr; }
+      .package-card.featured { grid-column:auto; }
       .infra-hero { padding-top:64px; }
     }
   </style>
@@ -51,7 +60,7 @@
       </a>
       <nav class="site-nav" aria-label="Navigazione principale">
         <a href="index.html">Home</a>
-        <a href="#servizi">Servizi</a>
+        <a href="#pacchetti">Soluzioni</a>
         <a href="#destinatari">A chi serve</a>
         <a href="#metodo">Come lavoriamo</a>
         <a href="#contatti">Contatti</a>
@@ -64,48 +73,97 @@
       <div class="container infra-hero-grid">
         <div>
           <p class="eyebrow">Infrastrutture digitali gestite</p>
-          <h1>Server, dati, documenti e servizi online in un unico ambiente affidabile.</h1>
+          <h1>Dati, mappe, documenti e servizi online. Organizzati, protetti e seguiti nel tempo.</h1>
           <p class="hero-lead">
-            GeoHub progetta e gestisce infrastrutture digitali per enti, studi tecnici e organizzazioni
-            che lavorano con dati territoriali, documenti, rilievi e applicazioni online.
+            GeoHub affianca studi tecnici, società ambientali, aziende di ingegneria e organizzazioni
+            che lavorano con dati e territorio, offrendo ambienti digitali pronti all'uso e gestiti nel tempo.
           </p>
           <p class="hero-text">
-            Non vendiamo semplicemente una VPS o uno spazio cloud: configuriamo, proteggiamo e manteniamo
-            l'ambiente necessario per far funzionare servizi GIS, portali, database, backup e flussi operativi.
+            Non vendiamo semplicemente spazio o tecnologia. Costruiamo soluzioni che aiutano a lavorare meglio,
+            ridurre disordine e duplicazioni, condividere informazioni e avere un unico referente per la gestione.
           </p>
           <div class="hero-actions">
-            <a class="button button-primary" href="#contatti">Parliamo del progetto</a>
-            <a class="button button-secondary" href="#servizi">Scopri i servizi</a>
+            <a class="button button-primary" href="#contatti">Parliamo della tua esigenza</a>
+            <a class="button button-secondary" href="#pacchetti">Scopri le soluzioni</a>
           </div>
         </div>
-        <aside class="infra-panel" aria-label="Cosa gestisce GeoHub">
+        <aside class="infra-panel" aria-label="Cosa offre GeoHub">
           <span class="panel-label">Geo + Hub</span>
-          <h2>La parte geografica incontra l'infrastruttura digitale.</h2>
+          <h2>Un unico punto di riferimento per ciò che deve restare ordinato e operativo.</h2>
           <ul>
-            <li>Server e applicazioni gestite</li>
+            <li>Ambienti digitali gestiti</li>
+            <li>Dati tecnici centralizzati</li>
+            <li>Mappe consultabili online</li>
+            <li>Aree documentali riservate</li>
             <li>Backup e continuità operativa</li>
-            <li>Portali documentali e aree riservate</li>
-            <li>Database, WebGIS e servizi territoriali</li>
-            <li>Integrazioni e automazioni tra sistemi</li>
           </ul>
         </aside>
       </div>
     </section>
 
-    <section id="servizi" class="section">
+    <section id="pacchetti" class="section">
       <div class="container">
         <div class="section-heading">
-          <p class="eyebrow">Servizi</p>
-          <h2>Un presidio tecnico per infrastrutture, dati e applicazioni.</h2>
-          <p>Ogni soluzione viene costruita attorno a un'esigenza operativa concreta, evitando piattaforme inutilmente complesse e configurazioni difficili da mantenere.</p>
+          <p class="eyebrow">Le soluzioni GeoHub</p>
+          <h2>Cinque servizi, combinabili in base a ciò che serve davvero.</h2>
+          <p>Ogni pacchetto risponde a un problema concreto. Possono essere attivati singolarmente oppure uniti in una soluzione più completa.</p>
         </div>
-        <div class="infra-grid">
-          <article class="infra-card"><h3>Server e applicazioni gestite</h3><p>VPS Linux, Docker, reverse proxy, HTTPS, domini, monitoraggio e manutenzione per applicazioni tecniche e servizi online.</p></article>
-          <article class="infra-card"><h3>Backup e continuità</h3><p>Copie su storage separato, controlli programmati, procedure di ripristino e supporto in caso di guasto o perdita dati.</p></article>
-          <article class="infra-card"><h3>Portali documentali</h3><p>Aree riservate per condividere pratiche, rilievi, tavole, fotografie e consegne con utenti e permessi controllati.</p></article>
-          <article class="infra-card"><h3>GIS e database territoriali</h3><p>PostGIS, QGIS Server, Lizmap, WebGIS e ambienti cartografici dedicati per consultare e gestire dati geografici.</p></article>
-          <article class="infra-card"><h3>Raccolta dati sul campo</h3><p>Flussi per rilievi, ispezioni, fotografie e aggiornamenti da smartphone o tablet, sincronizzati con QGIS e database.</p></article>
-          <article class="infra-card"><h3>Integrazioni e automazioni</h3><p>Collegamenti tra moduli, database, cartelle, portali e sistemi esistenti per ridurre attività manuali e duplicazioni.</p></article>
+
+        <div class="package-grid">
+          <article class="package-card">
+            <span class="package-label">GeoHub Infrastructure</span>
+            <h3>L'ambiente digitale gestito su cui far funzionare servizi e applicazioni.</h3>
+            <p>Per chi ha strumenti online importanti ma non vuole occuparsi direttamente della loro gestione quotidiana.</p>
+            <ul>
+              <li>Un ambiente dedicato e organizzato</li>
+              <li>Controlli periodici e manutenzione programmata</li>
+              <li>Un unico referente per la parte infrastrutturale</li>
+            </ul>
+          </article>
+
+          <article class="package-card">
+            <span class="package-label">GeoHub Data</span>
+            <h3>Un archivio centrale per dati tecnici e territoriali.</h3>
+            <p>Per ridurre file duplicati, versioni non allineate e informazioni disperse tra computer e cartelle diverse.</p>
+            <ul>
+              <li>Dati condivisi e sempre più ordinati</li>
+              <li>Accessi differenziati per tecnici e responsabili</li>
+              <li>Salvataggi e controlli programmati</li>
+            </ul>
+          </article>
+
+          <article class="package-card">
+            <span class="package-label">GeoHub Maps</span>
+            <h3>Mappe e informazioni consultabili direttamente online.</h3>
+            <p>Per presentare e condividere dati territoriali senza inviare continuamente PDF, allegati pesanti o file tecnici.</p>
+            <ul>
+              <li>Portali cartografici accessibili da browser</li>
+              <li>Accesso pubblico o riservato</li>
+              <li>Contenuti organizzati per progetto o committente</li>
+            </ul>
+          </article>
+
+          <article class="package-card">
+            <span class="package-label">GeoHub Documents</span>
+            <h3>Un'area riservata per documenti, pratiche e consegne.</h3>
+            <p>Per chi vuole ridurre email, link sparsi e richieste ripetitive, mantenendo materiali e versioni in un unico punto.</p>
+            <ul>
+              <li>Spazi organizzati per cliente o progetto</li>
+              <li>Accessi separati e controllati</li>
+              <li>Condivisione di relazioni, fotografie e tavole</li>
+            </ul>
+          </article>
+
+          <article class="package-card featured">
+            <span class="package-label">GeoHub Continuity</span>
+            <h3>Backup, controllo e procedure di ripristino.</h3>
+            <p>Per chi non vuole scoprire troppo tardi che i salvataggi non erano aggiornati o che nessuno sapeva come recuperare il servizio.</p>
+            <ul>
+              <li>Salvataggi automatici su spazio separato</li>
+              <li>Controlli periodici sull'esito delle copie</li>
+              <li>Una procedura chiara per il ripristino</li>
+            </ul>
+          </article>
         </div>
       </div>
     </section>
@@ -114,16 +172,16 @@
       <div class="container">
         <div class="section-heading">
           <p class="eyebrow">A chi serve</p>
-          <h2>Per chi gestisce dati tecnici e servizi che devono restare operativi.</h2>
+          <h2>Per realtà tecniche che vogliono lavorare meglio senza diventare gestori di sistemi.</h2>
         </div>
         <div class="infra-grid">
-          <article class="infra-card"><h3>Enti e uffici tecnici</h3><p>Per mantenere ordinati dati territoriali, servizi WebGIS, database e piattaforme consultate da tecnici e cittadini.</p></article>
-          <article class="infra-card"><h3>Studi professionali</h3><p>Per organizzare progetti, documenti, rilievi, collaboratori e aree di consegna senza gestire direttamente server e applicazioni.</p></article>
-          <article class="infra-card"><h3>Aziende e gestori di reti</h3><p>Per censimenti, manutenzioni, ispezioni, sottoservizi, impianti e attività che richiedono dati geografici aggiornati.</p></article>
+          <article class="infra-card"><h3>Studi tecnici e ambientali</h3><p>Per organizzare dati, mappe, documenti, collaboratori e consegne, mantenendo un unico punto di riferimento.</p></article>
+          <article class="infra-card"><h3>Società di ingegneria e geologia</h3><p>Per centralizzare informazioni, condividere risultati e ridurre la dipendenza da file sparsi e procedure manuali.</p></article>
+          <article class="infra-card"><h3>Aziende che gestiscono reti, impianti o patrimoni</h3><p>Per rendere più accessibili dati tecnici, cartografie, documenti e informazioni operative.</p></article>
         </div>
         <div class="infra-note" style="margin-top:28px;">
-          <h3>Il cloud documentale è un modulo, non il prodotto principale.</h3>
-          <p>Strumenti come Nextcloud possono essere inseriti quando servono davvero, insieme a backup, portali, GIS e processi di lavoro. La soluzione viene scelta in base al problema da risolvere, non al software da installare.</p>
+          <h3>Una soluzione costruita attorno al problema, non al nome del software.</h3>
+          <p>GeoHub combina solo i moduli realmente utili. Il cliente non deve scegliere tecnologie: parte dalla propria esigenza e riceve una proposta chiara, gestita e sostenibile nel tempo.</p>
         </div>
       </div>
     </section>
@@ -132,13 +190,13 @@
       <div class="container">
         <div class="section-heading">
           <p class="eyebrow">Come lavoriamo</p>
-          <h2>Dall'analisi alla gestione continuativa.</h2>
+          <h2>Dall'esigenza alla gestione continuativa.</h2>
         </div>
         <div class="infra-steps">
-          <article class="infra-step"><strong>01. Analisi</strong><span>Valutiamo dati, utenti, applicazioni, criticità e obiettivi operativi.</span></article>
-          <article class="infra-step"><strong>02. Progettazione</strong><span>Definiamo infrastruttura, accessi, backup, domini e strumenti realmente necessari.</span></article>
-          <article class="infra-step"><strong>03. Attivazione</strong><span>Configuriamo e pubblichiamo l'ambiente, con credenziali e indicazioni essenziali.</span></article>
-          <article class="infra-step"><strong>04. Gestione</strong><span>Seguiamo aggiornamenti, monitoraggio, backup, assistenza e piccole evoluzioni.</span></article>
+          <article class="infra-step"><strong>01. Ascolto</strong><span>Partiamo dai problemi attuali, dagli utenti coinvolti e dagli obiettivi concreti.</span></article>
+          <article class="infra-step"><strong>02. Proposta</strong><span>Definiamo una soluzione comprensibile, con servizi, limiti e costi chiari.</span></article>
+          <article class="infra-step"><strong>03. Attivazione</strong><span>Prepariamo l'ambiente e accompagniamo il referente del cliente nell'avvio.</span></article>
+          <article class="infra-step"><strong>04. Gestione</strong><span>Seguiamo controlli, aggiornamenti, salvataggi e attività concordate.</span></article>
         </div>
       </div>
     </section>
@@ -147,9 +205,9 @@
       <div class="container">
         <div class="infra-cta">
           <p class="eyebrow">Valutazione iniziale</p>
-          <h2>Hai dati, applicazioni o servizi tecnici da organizzare e mantenere?</h2>
-          <p>Raccontaci come lavorate oggi: valuteremo se serve un portale, un ambiente GIS, un sistema di backup o un'infrastruttura gestita.</p>
-          <a class="button button-primary" href="mailto:info@geo-hub.it?subject=Richiesta%20infrastrutture%20digitali%20GeoHub">Richiedi informazioni</a>
+          <h2>Hai dati, mappe, documenti o servizi online che oggi richiedono troppo tempo e attenzione?</h2>
+          <p>Raccontaci come lavorate oggi. Valuteremo insieme quale combinazione di servizi può semplificare davvero il vostro lavoro.</p>
+          <a class="button button-primary" href="mailto:info@geo-hub.it?subject=Richiesta%20soluzioni%20digitali%20GeoHub">Richiedi un confronto</a>
         </div>
       </div>
     </section>

@@ -1329,3 +1329,10 @@ h3 {
 /* La decorazione della card non deve intercettare click o tocchi */
 .hero-visual-card::before { pointer-events: none; }
 .hero-mini-list { position: relative; z-index: 2; }
+
+/* Livelli della card hero: contenuto e link sempre sopra la patina */
+.hero-visual-card { isolation: isolate; }
+.hero-visual-card::before { z-index: 0; pointer-events: none; }
+.hero-identity-card > * { position: relative; z-index: 1; }
+.hero-identity-card .hero-mini-list { position: relative !important; z-index: 2 !important; }
+.hero-identity-card .hero-mini-list a { position: relative; z-index: 3; pointer-events: auto; }

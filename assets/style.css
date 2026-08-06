@@ -1326,3 +1326,6 @@ h3 {
   box-shadow: 0 10px 18px rgba(30,138,99,.22);
   outline: none;
 }
+/* La decorazione della card non deve intercettare click o tocchi */
+.hero-visual-card::before { pointer-events: none; }
+.hero-mini-list { position: relative; z-index: 2; }

@@ -1305,3 +1305,24 @@ h3 {
   .hero-identity-card .hero-logo-frame-clean,
   .hero-identity-card .hero-visual-logo { width: 145px !important; max-width: 145px !important; }
 }
+/* Etichette interattive nella card hero */
+.hero-mini-list a {
+  display: inline-flex;
+  align-items: center;
+  padding: .55rem .75rem;
+  border: 1px solid rgba(30,138,99,.18);
+  border-radius: 999px;
+  background: rgba(30,138,99,.10);
+  color: var(--primary);
+  font-weight: 700;
+  font-size: .9rem;
+  transition: transform 180ms ease, background 180ms ease, color 180ms ease, box-shadow 180ms ease;
+}
+.hero-mini-list a:hover,
+.hero-mini-list a:focus-visible {
+  transform: translateY(-3px);
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 10px 18px rgba(30,138,99,.22);
+  outline: none;
+}

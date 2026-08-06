@@ -1261,3 +1261,47 @@ h3 {
 
 
 }
+
+/* Card di sintesi nella hero: disposizione verticale e leggibile */
+.hero-identity-card {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  text-align: center;
+}
+.hero-identity-card .hero-logo-frame,
+.hero-identity-card .hero-logo-frame-clean {
+  width: 170px !important;
+  max-width: 170px !important;
+  min-width: 0 !important;
+  margin: 0;
+}
+.hero-identity-card .hero-visual-logo {
+  width: 170px !important;
+  max-width: 170px !important;
+}
+.hero-identity-text {
+  max-width: 100%;
+}
+.hero-identity-text h2 {
+  max-width: 15ch;
+  margin: .2rem auto .65rem;
+  font-size: clamp(1.7rem, 2.2vw, 2.35rem);
+}
+.hero-identity-text p {
+  max-width: 35ch;
+  margin: 0 auto;
+}
+.hero-mini-list {
+  justify-content: center;
+  margin-top: .35rem;
+}
+@media(max-width:640px) {
+  .hero-identity-card { padding: 1.6rem; }
+  .hero-identity-card .hero-logo-frame,
+  .hero-identity-card .hero-logo-frame-clean,
+  .hero-identity-card .hero-visual-logo { width: 145px !important; max-width: 145px !important; }
+}

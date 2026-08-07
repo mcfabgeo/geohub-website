@@ -1347,20 +1347,28 @@ h3 {
   .mobile-nav summary {
     display: inline-flex;
     align-items: center;
-    gap: .55rem;
-    min-height: 44px;
-    padding: .65rem .85rem;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    background: rgba(255,255,255,.88);
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
     color: var(--primary);
     cursor: pointer;
-    font-weight: 800;
     list-style: none;
   }
   .mobile-nav summary::-webkit-details-marker { display: none; }
-  .mobile-nav summary span { font-size: 1.1rem; line-height: 1; }
-  .mobile-nav[open] summary { background: var(--primary); color: #fff; }
+  .mobile-nav summary span {
+    display: block;
+    width: 30px;
+    height: 18px;
+    font-size: 0;
+    background:
+      linear-gradient(currentColor, currentColor) 0 0 / 100% 2px no-repeat,
+      linear-gradient(currentColor, currentColor) 0 50% / 100% 2px no-repeat,
+      linear-gradient(currentColor, currentColor) 0 100% / 100% 2px no-repeat;
+  }
+  .mobile-nav[open] summary { background: transparent; color: var(--accent); }
   .mobile-nav nav {
     position: absolute;
     top: calc(100% + .5rem);

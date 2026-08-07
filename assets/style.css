@@ -1358,17 +1358,32 @@ h3 {
     list-style: none;
   }
   .mobile-nav summary::-webkit-details-marker { display: none; }
-  .mobile-nav summary span {
+  .mobile-nav summary .menu-icon {
+    position: relative;
     display: block;
     width: 30px;
-    height: 18px;
-    font-size: 0;
-    background:
-      linear-gradient(currentColor, currentColor) 0 0 / 100% 2px no-repeat,
-      linear-gradient(currentColor, currentColor) 0 50% / 100% 2px no-repeat,
-      linear-gradient(currentColor, currentColor) 0 100% / 100% 2px no-repeat;
+    height: 20px;
   }
+  .mobile-nav summary .menu-icon i {
+    position: absolute;
+    left: 0;
+    display: block;
+    width: 100%;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    transition: transform .24s ease, top .24s ease, opacity .18s ease;
+  }
+  .mobile-nav summary .menu-icon i:nth-child(1) { top: 1px; }
+  .mobile-nav summary .menu-icon i:nth-child(2) { top: 9px; }
+  .mobile-nav summary .menu-icon i:nth-child(3) { top: 17px; }
   .mobile-nav[open] summary { background: transparent; color: var(--accent); }
+  .mobile-nav[open] summary .menu-icon i:nth-child(1) { top: 9px; transform: rotate(45deg); }
+  .mobile-nav[open] summary .menu-icon i:nth-child(2) { opacity: 0; transform: scaleX(.55); }
+  .mobile-nav[open] summary .menu-icon i:nth-child(3) { top: 9px; transform: rotate(-45deg); }
+  @media (prefers-reduced-motion: reduce) {
+    .mobile-nav summary .menu-icon i { transition: none; }
+  }
   .mobile-nav nav {
     position: absolute;
     top: calc(100% + .5rem);

@@ -1405,4 +1405,15 @@ h3 {
   }
   .mobile-nav nav a:hover,
   .mobile-nav nav a:focus-visible { background: rgba(30,138,99,.12); outline: none; }
+  .mobile-nav[open] nav {
+    transform-origin: top right;
+    animation: mobile-menu-reveal .28s cubic-bezier(.2,.8,.2,1) both;
+  }
+  @keyframes mobile-menu-reveal {
+    from { opacity: 0; transform: translateY(-10px) scale(.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mobile-nav[open] nav { animation: none; }
+  }
 }

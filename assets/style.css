@@ -1471,3 +1471,14 @@ h3 {
   .desktop-nav[open] nav { animation: none; }
 }
 @media (max-width: 760px) { .desktop-nav { display: none; } }
+
+/* Apertura del menu desktop al passaggio del cursore */
+@media (min-width: 761px) {
+  .desktop-nav:hover nav,
+  .desktop-nav:focus-within nav {
+    display: grid;
+    animation: desktop-menu-reveal .25s cubic-bezier(.2,.8,.2,1) both;
+  }
+  .desktop-nav:hover summary,
+  .desktop-nav:focus-within summary { color: var(--accent); }
+}

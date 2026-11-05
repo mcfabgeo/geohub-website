@@ -1,5 +1,19 @@
 # GEO-HUB Website
 
+## Demo WebGIS
+
+La demo pubblica si trova in `demo/webgis/index.html` ed e' collegata dalla homepage e dai menu.
+Contiene solo dati fittizi, in sola lettura, e non richiede PHP o database.
+
+Per aggiornarla:
+1. Sostituire i file della demo mantenendo i percorsi relativi e la cartella `lib/`.
+2. Conservare l'avviso sui dati fittizi e il collegamento di ritorno a GeoHub.
+3. Verificare ricerca catastale, livelli, misure, stampa ed esportazione prima della pubblicazione.
+
+OpenStreetMap e Street View richiedono servizi esterni; l'esportazione GeoPackage carica sql.js da jsDelivr.
+Le preferenze di visualizzazione sono memorizzate nel browser.
+La documentazione originale e' in `demo/webgis/leggimi.md`.
+
 Sito vetrina statico per **GEO-HUB**, pensato per presentare servizi GIS rivolti a Comuni ed enti pubblici.
 
 ## Caratteristiche
@@ -61,3 +75,4 @@ Presentare in modo chiaro e professionale i servizi GEO-HUB:
 - CKAN
 - MapStore
 - manutenzione e supporto tecnico
+

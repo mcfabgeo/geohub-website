@@ -1,0 +1,1881 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WebGIS demo — Database topografico, Piano Operativo e Protezione civile</title>
+<link rel="stylesheet" href="lib/ol.css">
+<meta name="description" content="Demo WebGIS GeoHub: cartografia tecnica, urbanistica, catasto e protezione civile con dati interamente fittizi.">
+<link rel="icon" href="../../assets/img/favicon.svg">
+<style>
+  :root{
+    --carta:#ffffff; --china:#14161a; --pannello:#1a1d22; --pannello-alto:#22262d;
+    --bordo:#31363f; --testo:#dfe3e8; --testo-quieto:#8d949f;
+    --blu:#2e6fb7; --evidenza:#ff5a1f;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden}
+  body{
+    font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    font-size:14px;line-height:1.45;color:var(--testo);background:var(--pannello);
+  }
+  #app{display:flex;height:100%}
+
+  #pannello{
+    width:340px;flex:0 0 340px;background:var(--pannello);
+    border-right:1px solid var(--bordo);display:flex;flex-direction:column;min-height:0;
+    height:100vh;height:100dvh;overflow-y:auto;overflow-x:hidden;
+    overscroll-behavior:contain;scrollbar-gutter:stable;-webkit-overflow-scrolling:touch;
+  }
+  #pannello::-webkit-scrollbar{width:10px}
+  #pannello::-webkit-scrollbar-track{background:var(--pannello)}
+  #pannello::-webkit-scrollbar-thumb{background:#454b55;border-radius:8px;border:2px solid var(--pannello)}
+  #pannello{scrollbar-width:thin;scrollbar-color:#454b55 var(--pannello)}
+  #pannello.chiuso{display:none}
+  .testata{padding:16px 16px 12px;border-bottom:1px solid var(--bordo);flex:0 0 auto}
+  .testata h1{margin:0;font-size:15px;font-weight:600;letter-spacing:-0.01em}
+  .testata p{margin:3px 0 0;font-size:12px;color:var(--testo-quieto)}
+
+  .strumenti{padding:12px 16px;border-bottom:1px solid var(--bordo);
+    display:flex;flex-direction:column;gap:10px;flex:0 0 auto}
+  .cerca{width:100%;padding:7px 10px;background:var(--pannello-alto);color:var(--testo);
+    border:1px solid var(--bordo);border-radius:5px;font:inherit;font-size:13px}
+  .cerca:focus{outline:2px solid var(--blu);outline-offset:-1px;border-color:transparent}
+  .cerca::placeholder{color:var(--testo-quieto)}
+
+  .livelli{display:flex;flex-direction:column;gap:5px}
+  .livelli-titolo{font-size:11px;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--testo-quieto)}
+  .livello{display:flex;align-items:center;gap:8px;font-size:12.5px;cursor:pointer}
+  .livello input{margin:0;accent-color:var(--blu);cursor:pointer}
+  .livello .quanti{margin-left:auto;font-size:11px;color:var(--testo-quieto);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+
+  .riga-opzioni{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--testo-quieto)}
+  .riga-opzioni label{display:flex;gap:6px;align-items:center;cursor:pointer}
+  .sfondo-blocco{display:flex;flex-direction:column;gap:7px}
+  .scelta{width:100%;padding:6px 8px;background:var(--pannello-alto);color:var(--testo);
+    border:1px solid var(--bordo);border-radius:5px;font:inherit;font-size:12.5px}
+  .scelta:focus{outline:2px solid var(--blu);outline-offset:-1px}
+  .velatura{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--testo-quieto)}
+  .velatura input[type=range]{flex:1;accent-color:var(--blu)}
+  .velatura[hidden]{display:none}
+  .azioni{display:flex;gap:8px}
+  .bottone{flex:1;padding:6px 8px;background:var(--pannello-alto);color:var(--testo);
+    border:1px solid var(--bordo);border-radius:5px;font:inherit;font-size:12px;cursor:pointer}
+  .bottone:hover{border-color:var(--blu)}
+  .bottone:focus-visible{outline:2px solid var(--blu);outline-offset:1px}
+  .bottone.attivo{background:var(--blu);border-color:var(--blu);color:#fff}
+  .strumenti-mappa{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .strumenti-mappa .bottone{min-width:0}
+  .strumenti-mappa .larga{grid-column:1 / -1}
+  .nota-strumento{font-size:11px;color:var(--testo-quieto);line-height:1.35;min-height:15px}
+
+  #legenda{flex:0 0 auto;overflow:visible;min-height:auto;padding:0 0 24px}
+  .gruppo-testa{
+    display:grid;grid-template-columns:18px 1fr auto 14px;gap:9px;align-items:center;
+    width:100%;padding:9px 16px;background:none;border:0;border-top:1px solid var(--bordo);
+    color:var(--testo);font:inherit;font-size:13px;text-align:left;cursor:pointer;
+  }
+  .gruppo-testa:first-child{border-top:0}
+  .gruppo-testa:hover{background:var(--pannello-alto)}
+  .gruppo-testa:focus-visible{outline:2px solid var(--blu);outline-offset:-2px}
+  .gruppo-testa[aria-expanded="true"]{background:var(--pannello-alto)}
+  .gruppo-testa input{margin:0;accent-color:var(--blu);cursor:pointer}
+  .gruppo-nome{overflow-wrap:anywhere}
+  .gruppo-nome i{font-style:normal;color:var(--testo-quieto);font-size:11.5px}
+  .gruppo-conteggio{font-size:11px;color:var(--testo-quieto);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .freccia{color:var(--testo-quieto);font-size:11px;line-height:1}
+  .gruppo-testa[aria-expanded="true"] .freccia{transform:rotate(90deg)}
+  .gruppo-corpo{padding:2px 0 8px;background:rgba(0,0,0,.14)}
+  .sotto-titolo{
+    padding:9px 16px 3px 22px;font-size:10.5px;letter-spacing:.05em;
+    text-transform:uppercase;color:var(--testo-quieto);
+  }
+  .sotto-titolo:first-child{padding-top:5px}
+
+  .voce{display:grid;grid-template-columns:18px 62px 1fr;gap:9px;align-items:center;
+    padding:5px 16px 5px 22px;cursor:pointer}
+  .voce:hover{background:var(--pannello-alto)}
+  .voce.spenta{opacity:.34}
+  .voce.assente .etichetta{color:var(--testo-quieto)}
+  .voce input{margin:0;accent-color:var(--blu);cursor:pointer}
+  .campione{width:62px;height:24px;background:var(--carta);border-radius:2px;display:block}
+  .etichetta{font-size:12.5px;line-height:1.3;overflow-wrap:anywhere}
+  .codice{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:11px;color:var(--testo-quieto)}
+  .conteggio{font-size:11px;color:var(--testo-quieto)}
+  .vuoto{padding:14px 16px;font-size:12px;color:var(--testo-quieto)}
+
+  #zona-mappa{flex:1;position:relative;min-width:0}
+  #mappa{position:absolute;inset:0;background:var(--carta)}
+  .ol-zoom{top:12px;left:12px}
+  .ol-zoom button{background:rgba(26,29,34,.88);border-radius:4px;font-size:17px}
+  .ol-zoom button:hover{background:var(--blu)}
+  .ol-scale-line{background:rgba(26,29,34,.88);border-radius:4px;left:12px;bottom:12px;padding:2px 6px}
+  .ol-scale-line-inner{color:#fff;border-color:#fff;font-size:11px}
+  .ol-attribution{bottom:46px;right:12px;background:rgba(26,29,34,.9);border-radius:5px;
+    max-width:calc(100% - 24px)}
+  .ol-attribution ul{color:var(--testo-quieto);font-size:11px;text-shadow:none}
+  .ol-attribution a{color:var(--testo)}
+  .ol-attribution button{background:rgba(26,29,34,.9);color:var(--testo)}
+
+  #maniglia{position:absolute;top:12px;left:12px;z-index:5;padding:7px 11px;
+    background:rgba(26,29,34,.9);color:var(--testo);border:1px solid var(--bordo);
+    border-radius:5px;cursor:pointer;font:inherit;font-size:12px;display:none}
+  #maniglia.visibile{display:block}
+
+
+
+  /* Pannello Statistiche GIS */
+  #statistiche-gis-btn{
+    position:absolute;right:12px;bottom:54px;z-index:8;
+    padding:8px 12px;background:rgba(26,29,34,.94);color:var(--testo);
+    border:1px solid var(--bordo);border-radius:6px;cursor:pointer;
+    font:600 12px/1.2 ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    box-shadow:0 3px 12px rgba(0,0,0,.2)
+  }
+  #statistiche-gis-btn:hover,#statistiche-gis-btn.attivo{background:var(--blu);border-color:var(--blu);color:#fff}
+  #statistiche-gis-btn:focus-visible{outline:2px solid #fff;outline-offset:2px}
+  #statistiche-gis{
+    position:absolute;right:12px;bottom:96px;z-index:10;width:390px;
+    max-width:calc(100% - 24px);max-height:calc(100% - 120px);overflow:auto;
+    background:rgba(26,29,34,.98);border:1px solid var(--bordo);border-radius:8px;
+    box-shadow:0 10px 34px rgba(0,0,0,.42);display:none;color:var(--testo)
+  }
+  #statistiche-gis.visibile{display:block}
+  .stats-testa{position:sticky;top:0;z-index:2;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+    padding:12px 14px;background:#1a1d22;border-bottom:1px solid var(--bordo)}
+  .stats-testa strong{font-size:14px;display:block}.stats-testa small{display:block;margin-top:2px;color:var(--testo-quieto);font-size:11px;font-weight:400}
+  .stats-corpo{padding:12px 14px 15px}
+  .stats-kpi{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+  .stats-card{background:#22262d;border:1px solid var(--bordo);border-radius:6px;padding:9px 10px;min-width:0}
+  .stats-card span{display:block;color:var(--testo-quieto);font-size:10.5px;text-transform:uppercase;letter-spacing:.04em}
+  .stats-card b{display:block;margin-top:2px;font-size:17px;line-height:1.2;font-weight:650;overflow-wrap:anywhere}
+  .stats-sezione{margin-top:14px}.stats-sezione:first-child{margin-top:0}
+  .stats-sezione h3{margin:0 0 8px;font-size:11px;color:#aeb7c3;text-transform:uppercase;letter-spacing:.06em}
+  .stats-riga{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;margin:7px 0;font-size:11.5px}
+  .stats-riga .nome{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.stats-riga .valore{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#dfe3e8}
+  .stats-barra{grid-column:1 / -1;height:5px;background:#111419;border-radius:999px;overflow:hidden;margin-top:-4px}
+  .stats-barra i{display:block;height:100%;background:#4d86c6;border-radius:999px;min-width:1px}
+  .stats-due{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .stats-metrica{padding:8px 9px;border:1px solid var(--bordo);border-radius:6px;background:#15191f}
+  .stats-metrica span{display:block;color:var(--testo-quieto);font-size:10.5px}.stats-metrica b{display:block;margin-top:2px;font-size:13px}
+  .stats-nota{margin-top:12px;color:var(--testo-quieto);font-size:10.5px;line-height:1.4}
+  #statistiche-gis::-webkit-scrollbar{width:9px}#statistiche-gis::-webkit-scrollbar-thumb{background:#454b55;border-radius:8px;border:2px solid #1a1d22}
+
+  #stato{position:absolute;right:12px;bottom:12px;z-index:5;
+    background:rgba(26,29,34,.9);border:1px solid var(--bordo);border-radius:5px;
+    padding:6px 10px;font-size:11.5px;color:var(--testo-quieto);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  #stato b{color:var(--testo);font-weight:500}
+
+  #avviso{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:6;
+    background:rgba(26,29,34,.94);border:1px solid var(--bordo);
+    border-left:3px solid var(--evidenza);border-radius:5px;padding:9px 13px;
+    font-size:12.5px;max-width:460px;display:none}
+  #avviso.visibile{display:block}
+
+  #scheda{position:absolute;top:12px;right:12px;z-index:7;width:310px;
+    max-height:calc(100% - 70px);background:var(--pannello);border:1px solid var(--bordo);
+    border-radius:6px;display:none;flex-direction:column;box-shadow:0 6px 28px rgba(0,0,0,.4)}
+  #scheda.visibile{display:flex}
+  .scheda-testa{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;
+    padding:11px 13px;border-bottom:1px solid var(--bordo)}
+  .scheda-testa strong{font-size:13px;font-weight:600;line-height:1.3}
+  .scheda-testa small{display:block;color:var(--testo-quieto);font-weight:400;font-size:11px}
+  .chiudi{background:none;border:0;color:var(--testo-quieto);font-size:19px;line-height:1;
+    cursor:pointer;padding:0 2px}
+  .chiudi:hover{color:var(--testo)}
+  .scheda-corpo{overflow-y:auto;padding:4px 0 8px}
+  .attributo{display:grid;grid-template-columns:112px 1fr;gap:8px;padding:4px 13px;font-size:12px}
+  .attributo dt{overflow-wrap:anywhere;color:var(--testo-quieto);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .attributo dd{margin:0;overflow-wrap:anywhere}
+  .navigatore{display:flex;align-items:center;justify-content:space-between;gap:8px;
+    padding:8px 13px;border-top:1px solid var(--bordo);font-size:12px;color:var(--testo-quieto)}
+  .ricerca-catasto{margin-top:10px;padding:10px;border:1px solid var(--bordo);border-radius:6px;background:#12161c}
+  .ricerca-catasto .titolo-ricerca{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--testo-quieto);margin-bottom:7px}
+  .ricerca-catasto .campi-catasto{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .ricerca-catasto .cerca{margin:0;width:100%}
+  .ricerca-catasto .bottone{margin-top:7px;width:100%}
+  .ricerca-catasto .esito-catasto{font-size:10.5px;color:var(--testo-quieto);line-height:1.35;margin-top:6px;min-height:14px}
+
+  #stampa-info{display:none}
+  @media print{
+    @page{size:landscape;margin:8mm}
+    html,body,#app,#zona-mappa{width:100%;height:100%;overflow:hidden;background:#fff}
+    #pannello,#maniglia,#scheda,#avviso,#stato,.ol-zoom,.ol-attribution{display:none!important}
+    #zona-mappa{position:fixed;inset:0}
+    #mappa{position:absolute;inset:0;border:1px solid #555}
+    .ol-scale-line{display:block!important;left:12mm!important;bottom:10mm!important;background:rgba(255,255,255,.92)!important;border:1px solid #555}
+    .ol-scale-line-inner{color:#000!important;border-color:#000!important}
+    #statistiche-gis-btn,#statistiche-gis{display:none!important}
+    #stampa-info{display:block!important;position:absolute;z-index:1000;pointer-events:none}
+    #stampa-info .nord{position:fixed;top:14mm;right:14mm;width:18mm;text-align:center;color:#000;font:bold 12px Arial}
+    #stampa-info .nord svg{display:block;width:18mm;height:22mm;margin:auto}
+    #stampa-info .legenda-stampa{position:fixed;right:14mm;bottom:14mm;max-width:80mm;background:rgba(255,255,255,.94);border:1px solid #555;padding:3mm 4mm;color:#111;font:11px Arial;line-height:1.35}
+    #stampa-info .legenda-stampa strong{display:block;font-size:12px;margin-bottom:1.5mm}
+    #stampa-info .titolo-stampa{position:fixed;left:14mm;top:12mm;background:rgba(255,255,255,.9);padding:2mm 3mm;border:1px solid #777;color:#111;font:bold 12px Arial}
+  }
+
+  @media (max-width:760px){
+    #pannello{position:absolute;z-index:9;height:100%;width:88%;max-width:340px}
+    #scheda{width:calc(100% - 24px)}
+    #statistiche-gis{width:calc(100% - 24px);right:12px;bottom:98px;max-height:calc(100% - 125px)}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="pannello">
+    <div class="testata">
+      <h1>WebGIS demo</h1>
+      <p><a href="../../" style="color:#a8e6c7">Torna a GeoHub</a> · <strong>Dati fittizi · Sola lettura</strong></p>
+      <p>Database topografico 10k, Piano Operativo, Protezione civile, stradario, civici, targhe e particelle catastali. Dati dimostrativi fittizi.</p>
+    </div>
+
+    <div class="strumenti">
+      <div class="livelli">
+        <span class="livelli-titolo">Livelli</span>
+        <div id="elenco-livelli"></div>
+      </div>
+
+      <input id="cerca" class="cerca" type="search"
+             placeholder="Filtra per codice o descrizione" autocomplete="off">
+
+      <div class="ricerca-catasto">
+        <div class="titolo-ricerca">Ricerca catastale</div>
+        <div class="campi-catasto">
+          <input id="catasto-foglio" class="cerca" type="text" inputmode="numeric"
+                 placeholder="Foglio" autocomplete="off">
+          <input id="catasto-particella" class="cerca" type="text" inputmode="numeric"
+                 placeholder="Particella" autocomplete="off">
+        </div>
+        <button class="bottone" id="cerca-catasto">Cerca foglio e particella</button>
+        <div class="esito-catasto" id="catasto-esito">Catasto in sola lettura. Prova: Foglio 2, Particella 10.</div>
+      </div>
+
+      <div class="riga-opzioni">
+        <label><input type="checkbox" id="solo-presenti" checked> Solo codici presenti</label>
+        <label><input type="checkbox" id="forza-scala"> Ignora soglia di scala</label>
+      </div>
+
+      <div class="sfondo-blocco">
+        <select id="sfondo" class="scelta" aria-label="Sfondo cartografico">
+          <option value="">Nessuno sfondo (carta bianca)</option>
+          <option value="osm">OpenStreetMap</option>
+        </select>
+        <div class="velatura" id="velatura" hidden>
+          <span>Velatura</span>
+          <input type="range" id="opacita" min="15" max="100" value="65">
+          <span id="opacita-valore">65%</span>
+        </div>
+      </div>
+
+      <div class="sfondo-blocco">
+        <span class="livelli-titolo">Esportazione dati</span>
+        <select id="export-layer" class="scelta" aria-label="Layer da esportare">
+          <option value="__ALL__">Tutti i layer</option>
+        </select>
+        <div class="azioni">
+          <button class="bottone" id="export-geojson">Scarica GeoJSON</button>
+          <button class="bottone" id="export-gpkg">Scarica GeoPackage</button>
+        </div>
+        <div class="nota-strumento" id="nota-export">Esporta i dati fittizi del WebGIS demo. Il GeoPackage richiede connessione internet.</div>
+      </div>
+
+      <div class="azioni">
+        <button class="bottone" id="accendi-tutto">Accendi tutto</button>
+        <button class="bottone" id="spegni-tutto">Spegni tutto</button>
+        <button class="bottone" id="inquadra">Inquadra</button>
+      </div>
+
+      <div class="livelli-titolo">Strumenti mappa</div>
+      <div class="strumenti-mappa">
+        <button class="bottone" id="street-view">Street View</button>
+        <button class="bottone" id="misura-linea">Misura lunghezza</button>
+        <button class="bottone" id="misura-area">Misura area</button>
+        <button class="bottone" id="seleziona-geometrie">Seleziona geometrie</button>
+        <button class="bottone" id="pulisci-misure">Pulisci strumenti</button>
+        <button class="bottone larga" id="stampa-mappa">Stampa schermata</button>
+      </div>
+      <div class="nota-strumento" id="nota-strumento">Modalità selezione: clicca una geometria per visualizzarne gli attributi.</div>
+
+    </div>
+
+    <div id="legenda"></div>
+  </aside>
+
+  <div id="zona-mappa">
+    <div id="mappa" role="application" aria-label="Mappa del WebGIS demo"></div>
+    <button id="maniglia">Legenda</button>
+    <div id="avviso"></div>
+    <button id="statistiche-gis-btn" type="button" aria-controls="statistiche-gis" aria-expanded="false">Statistiche GIS</button>
+    <section id="statistiche-gis" aria-label="Statistiche GIS" aria-hidden="true">
+      <div class="stats-testa">
+        <div><strong>Statistiche GIS</strong><small>Riepilogo dinamico del WebGIS e della vista corrente</small></div>
+        <button class="chiudi" id="statistiche-gis-chiudi" aria-label="Chiudi statistiche">&times;</button>
+      </div>
+      <div class="stats-corpo" id="statistiche-gis-corpo"></div>
+    </section>
+    <div id="stato"></div>
+    <div id="stampa-info" aria-hidden="true">
+      <div class="titolo-stampa">WebGIS demo</div>
+      <div class="nord">N
+        <svg viewBox="0 0 60 80" aria-hidden="true">
+          <path d="M30 2 L52 68 L30 54 L8 68 Z" fill="white" stroke="black" stroke-width="3"/>
+          <path d="M30 2 L30 54 L8 68 Z" fill="black"/>
+        </svg>
+      </div>
+      <div class="legenda-stampa" id="legenda-stampa"><strong>Legenda</strong>Nessuna area selezionata</div>
+    </div>
+
+    <div id="scheda" role="dialog" aria-label="Attributi dell'elemento">
+      <div class="scheda-testa">
+        <strong id="scheda-titolo"></strong>
+        <button class="chiudi" id="scheda-chiudi" aria-label="Chiudi">&times;</button>
+      </div>
+      <div class="scheda-corpo"><dl id="scheda-attributi"></dl></div>
+      <div class="navigatore" id="scheda-navigatore" hidden>
+        <button class="bottone" id="prec">Precedente</button>
+        <span id="posizione"></span>
+        <button class="bottone" id="succ">Successivo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="lib/ol.js"></script>
+<script src="stile.js"></script>
+<script src="dati.js"></script>
+<script src="catasto.js"></script>
+<script>
+(function(){
+'use strict';
+
+var inErrore = false;
+function segnala(testo){
+  inErrore = true;
+  var box = document.getElementById('avviso');
+  if (!box) { alert(testo); return; }
+  box.textContent = testo;
+  box.classList.add('visibile');
+}
+window.addEventListener('error', function(ev){
+  var t = ev.target;
+  if (t && (t.src || t.href)) {
+    segnala('Non si carica ' + String(t.src || t.href).split('/').pop()
+          + '. Serve la cartella completa: index.html da solo non basta.');
+  } else {
+    segnala('Errore: ' + (ev.message || ev.type));
+  }
+}, true);
+
+if (typeof ol === 'undefined' || typeof STILE === 'undefined'
+    || typeof DATI === 'undefined' || typeof CATASTO === 'undefined'
+    || typeof ESTENSIONE === 'undefined' || typeof CONFINE_DEMO === 'undefined') {
+  segnala('Mancano dei file. Scarica la cartella intera con dentro lib/, '
+        + 'dati.js, catasto.js e stile.js, poi riapri index.html.');
+  return;
+}
+
+var DPI = 96, PX_PER_M = DPI / 0.0254;
+function scalaDa(resolution){ return resolution * PX_PER_M; }
+
+/* Sotto questa dimensione il testo e' solo rumore: le etichette del QML sono
+   in unita' mappa, quindi crescono con lo zoom e ricompaiono da sole. */
+var TESTO_MINIMO_PX = 5;
+
+/* Catasto: layer di sola lettura, come tutti gli altri layer di questa demo. */
+var CATASTO_DEF = {
+  table:'catasto_particelle',
+  title:'Catasto - Particelle',
+  minScale:'0',
+  off:true,
+  field:'__catasto',
+  counts:{particella:CATASTO.features.length},
+  nulli:0,
+  total:CATASTO.features.length,
+  single:null,
+  labels:{
+    field:'particella',
+    maxScale:5000,
+    size:11,
+    sizeUnit:'px',
+    family:'Arial',
+    color:'#102f4d',
+    buffer:1.6,
+    bufferColor:'rgba(255,255,255,0.92)',
+    bold:true,
+    italic:false,
+    offsetX:0,
+    offsetY:0
+  },
+  rules:[{
+    value:'particella',
+    label:'Particelle catastali',
+    parts:[{kind:'fill', fill:'rgba(0,0,0,0)', stroke:'#17365d', width:1.25}]
+  }]
+};
+DATI.catasto_particelle = CATASTO;
+/* In fondo all'array viene disegnato sopra agli altri vettori e compare
+   in alto nell'elenco livelli, senza alterare i layer modificabili esistenti. */
+STILE.layers.push(CATASTO_DEF);
+
+/* ============================================================
+   1. Indice delle regole
+   ============================================================ */
+var acceso = {};          /* "tabella|codice" -> booleano */
+var livelloAcceso = {};   /* "tabella" -> booleano */
+var REGOLE = {};          /* "tabella" -> {codice: regola} */
+
+/* Preferenze di visualizzazione del singolo browser.
+   Servono esclusivamente a mantenere le scelte dopo F5. */
+var CHIAVE_VISUALIZZAZIONE = 'webgis_demo_visualizzazione_v1';
+var preferenzeVisualizzazione = {};
+
+try {
+  preferenzeVisualizzazione =
+    JSON.parse(localStorage.getItem(CHIAVE_VISUALIZZAZIONE) || '{}') || {};
+} catch(err) {
+  preferenzeVisualizzazione = {};
+}
+
+function salvaPreferenzeVisualizzazione(){
+  var stato = {
+    livelloAcceso: Object.assign({}, livelloAcceso),
+    acceso: Object.assign({}, acceso)
+  };
+
+  var sf = document.getElementById('sfondo');
+  var op = document.getElementById('opacita');
+  var sp = document.getElementById('solo-presenti');
+  var fs = document.getElementById('forza-scala');
+
+  if (sf) stato.sfondo = sf.value;
+  if (op) stato.opacita = op.value;
+  if (sp) stato.soloPresenti = sp.checked;
+  if (fs) stato.forzaScala = fs.checked;
+
+  try {
+    localStorage.setItem(CHIAVE_VISUALIZZAZIONE, JSON.stringify(stato));
+  } catch(err) {}
+}
+
+STILE.layers.forEach(function(L){
+  livelloAcceso[L.table] = !L.off;
+  REGOLE[L.table] = {};
+
+  L.rules.forEach(function(r){
+    REGOLE[L.table][r.value] = r;
+    acceso[L.table + '|' + r.value] = true;
+  });
+});
+
+/* Se questo browser ha già delle preferenze, prevalgono sui default. */
+if (preferenzeVisualizzazione.livelloAcceso) {
+  Object.keys(preferenzeVisualizzazione.livelloAcceso).forEach(function(k){
+    if (Object.prototype.hasOwnProperty.call(livelloAcceso,k)) {
+      livelloAcceso[k] = !!preferenzeVisualizzazione.livelloAcceso[k];
+    }
+  });
+}
+
+if (preferenzeVisualizzazione.acceso) {
+  Object.keys(preferenzeVisualizzazione.acceso).forEach(function(k){
+    if (Object.prototype.hasOwnProperty.call(acceso,k)) {
+      acceso[k] = !!preferenzeVisualizzazione.acceso[k];
+    }
+  });
+}
+
+function famiglia(codice){
+  var m = String(codice).match(/(\d{3})/);
+  return m ? m[1].charAt(0) : '?';
+}
+var FAMIGLIE = {
+  '1': 'Viabilit\u00e0 e infrastrutture', '2': 'Edificato', '3': 'Idrografia',
+  '4': 'Reti tecnologiche', '5': 'Muri, recinzioni e siepi',
+  '6': 'Morfologia del terreno', '7': 'Vegetazione e limiti colturali',
+  '8': 'Curve di livello', '9': 'Altri elementi', '?': 'Senza famiglia'
+};
+
+/* ============================================================
+   2. Motore di stile
+   ============================================================ */
+var cacheTratto = {}, cacheIcone = {}, cachePattern = {}, pendenti = 0;
+
+function tratto(p){
+  var k = p.color + '|' + p.width + '|' + (p.dash || '') + '|' + p.cap + '|' + p.join;
+  if (!cacheTratto[k]) {
+    cacheTratto[k] = new ol.style.Stroke({
+      color: p.color, width: p.width, lineCap: p.cap,
+      lineJoin: p.join, lineDash: p.dash || null
+    });
+  }
+  return cacheTratto[k];
+}
+
+function icona(chiave, dim, rotazione, spostamento, sfoltimento){
+  var gradi = Math.round(rotazione * 180 / Math.PI);
+  var k = chiave + '|' + dim + '|' + gradi + '|' + (sfoltimento || '');
+  if (!cacheIcone[k]) {
+    /* sfoltimento 'none': il simbolo resta sempre visibile anche se il livello
+       sfoltisce le etichette (serve ai punti con etichetta, es. i civici) */
+    cacheIcone[k] = new ol.style.Icon({
+      src: STILE.svg[chiave], width: dim, height: dim,
+      rotation: gradi * Math.PI / 180,
+      displacement: spostamento || [0, 0], rotateWithView: true,
+      declutterMode: sfoltimento || undefined
+    });
+  }
+  return cacheIcone[k];
+}
+
+/* La trama di riempimento diventa un motivo di canvas. L'immagine arriva in
+   differita, quindi al primo giro il poligono resta senza campitura e si
+   ridisegna appena pronta. */
+function trama(p){
+  var k = p.svg + '|' + p.tile;
+  if (k in cachePattern) return cachePattern[k];
+  cachePattern[k] = null;
+  pendenti++;
+  var img = new Image();
+  img.onload = function(){
+    var lato = Math.max(1, Math.round(p.tile));
+    var c = document.createElement('canvas');
+    c.width = lato; c.height = lato;
+    var g = c.getContext('2d');
+    g.drawImage(img, 0, 0, lato, lato);
+    cachePattern[k] = g.createPattern(c, 'repeat');
+    pendenti--;
+    ridisegna();
+  };
+  img.onerror = function(){ pendenti--; };
+  img.src = STILE.svg[p.svg];
+  return null;
+}
+
+function marcatoriLungoLinea(geom, p, resolution, raccolta){
+  var intervallo = p.interval * resolution;
+  if (!(intervallo > 0) || !p.svg) return;
+  var tipo = geom.getType();
+  var linee = tipo === 'MultiLineString' ? geom.getCoordinates()
+            : tipo === 'LineString' ? [geom.getCoordinates()] : null;
+  if (!linee) return;
+  var proprio = (p.angle || 0) * Math.PI / 180;
+
+  for (var l = 0; l < linee.length; l++) {
+    var c = linee[l];
+    var avanzo = (p.offsetAlong || 0) * resolution;
+    for (var i = 1; i < c.length; i++) {
+      var x1 = c[i-1][0], y1 = c[i-1][1];
+      var dx = c[i][0] - x1, dy = c[i][1] - y1;
+      var lung = Math.sqrt(dx*dx + dy*dy);
+      if (lung === 0) continue;
+      var rot = p.rotate === false ? proprio : -Math.atan2(dy, dx) + proprio;
+      var d = avanzo;
+      while (d <= lung) {
+        var t = d / lung;
+        raccolta.push(new ol.style.Style({
+          geometry: new ol.geom.Point([x1 + dx*t, y1 + dy*t]),
+          image: icona(p.svg, p.size, rot, p.offset)
+        }));
+        d += intervallo;
+      }
+      avanzo = d - lung;
+    }
+  }
+}
+
+function parteInStile(p, feature, resolution, raccolta){
+  if (p.kind === 'line') {
+    raccolta.push(new ol.style.Style({stroke: tratto(p)}));
+
+  } else if (p.kind === 'markerline') {
+    marcatoriLungoLinea(feature.getGeometry(), p, resolution, raccolta);
+
+  } else if (p.kind === 'marker') {
+    var rot = (p.angle || 0) * Math.PI / 180;
+    if (p.angleField) {
+      var v = parseFloat(feature.get(p.angleField));
+      if (!isNaN(v)) rot += (p.angleSign || 1) * v * Math.PI / 180;
+    }
+    if (p.svg) {
+      raccolta.push(new ol.style.Style({image: icona(p.svg, p.size, rot, p.offset, p.declutter)}));
+    } else if (p.size > 0.05) {
+      raccolta.push(new ol.style.Style({image: new ol.style.Circle({
+        radius: p.size / 2,
+        fill: p.fill ? new ol.style.Fill({color: p.fill}) : null,
+        stroke: p.stroke ? new ol.style.Stroke({color: p.stroke,
+                width: p.strokeWidth || 0.5}) : null
+      })}));
+    }
+
+  } else if (p.kind === 'fill') {
+    raccolta.push(new ol.style.Style({
+      fill: p.fill ? new ol.style.Fill({color: p.fill}) : null,
+      stroke: p.stroke ? new ol.style.Stroke({color: p.stroke, width: p.width}) : null
+    }));
+
+  } else if (p.kind === 'svgfill') {
+    var pat = p.svg ? trama(p) : null;
+    raccolta.push(new ol.style.Style({
+      fill: pat ? new ol.style.Fill({color: pat}) : null,
+      stroke: p.stroke ? new ol.style.Stroke({color: p.stroke, width: p.width}) : null
+    }));
+  }
+}
+
+function costruisciStile(L){
+  var etich = L.labels;
+  return function(feature, resolution){
+    if (!livelloAcceso[L.table]) return null;
+    if (L.minScale > 0 && scalaDa(resolution) > L.minScale && !forzaScala.checked) return null;
+
+    var raccolta = [];
+
+    if (L.field) {
+      var codice = feature.get(L.field);
+      var regola = REGOLE[L.table][codice];
+      if (!regola || !acceso[L.table + '|' + codice]) return null;
+      regola.parts.forEach(function(p){ parteInStile(p, feature, resolution, raccolta); });
+    } else if (L.single) {
+      L.single.forEach(function(p){ parteInStile(p, feature, resolution, raccolta); });
+    }
+
+    if (etich) {
+      var testo = feature.get(etich.field);
+      /* maxScale: soglia propria delle etichette, per i layer aggiunti */
+      var oltre = etich.maxScale > 0 && scalaDa(resolution) > etich.maxScale;
+      if (!oltre && testo !== undefined && testo !== null && String(testo).trim() !== '') {
+        var px = etich.sizeUnit === 'map' ? etich.size / resolution : etich.size;
+        if (px >= TESTO_MINIMO_PX) {
+          raccolta.push(new ol.style.Style({text: new ol.style.Text({
+            text: String(testo).trim(),
+            offsetX: etich.offsetX || 0, offsetY: etich.offsetY || 0,
+            font: (etich.italic ? 'italic ' : '') + (etich.bold ? '600 ' : '')
+                  + px.toFixed(1) + 'px "' + etich.family + '", sans-serif',
+            fill: new ol.style.Fill({color: etich.color}),
+            stroke: etich.buffer ? new ol.style.Stroke({
+              color: etich.bufferColor, width: etich.buffer * 2}) : null,
+            overflow: true
+          })}));
+        }
+      }
+    }
+    return raccolta;
+  };
+}
+
+/* ============================================================
+   3. Mappa e livelli
+   ============================================================ */
+var forzaScala = document.getElementById('forza-scala');
+var lettore = new ol.format.GeoJSON();
+var livelliOL = [];
+
+/* Demo in sola lettura: i dati sono quelli caricati da dati.js e catasto.js.
+   Nessun salvataggio, nessuna modifica, nessun server. */
+
+
+STILE.layers.forEach(function(L){
+  var raccolta = DATI[L.table];
+  if (!raccolta) return;
+  L.minScale = parseFloat(L.minScale) || 0;
+  var sorgente = new ol.source.Vector({
+    features: lettore.readFeatures(raccolta, {
+      dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'
+    })
+  });
+  var strato = new ol.layer.Vector({
+    source: sorgente,
+    style: costruisciStile(L),
+    renderBuffer: 300,
+    declutter: !!L.labels      /* le etichette non si sovrappongono */
+  });
+  strato.set('def', L);
+  livelliOL.push(strato);
+});
+
+function ridisegna(){ livelliOL.forEach(function(s){ s.changed(); }); }
+/* Sfondo cartografico: solo OpenStreetMap (oppure carta bianca). */
+var SORGENTI = {
+  osm: {etichetta: 'OpenStreetMap', fai: function(){ return new ol.source.OSM(); }}
+};
+var sfondo = new ol.layer.Tile({visible: false, opacity: 0.65});
+
+var evidenziato = new ol.layer.Vector({
+  source: new ol.source.Vector(),
+  style: new ol.style.Style({
+    stroke: new ol.style.Stroke({color: '#ff5a1f', width: 4}),
+    image: new ol.style.Circle({radius: 8,
+      stroke: new ol.style.Stroke({color: '#ff5a1f', width: 3})})
+  })
+});
+
+
+/* Misure: layer separato, con etichetta metrica persistente. */
+var sorgenteMisure = new ol.source.Vector();
+function testoMisura(geom){
+  if (!geom) return '';
+  if (geom.getType() === 'Polygon') {
+    var a = ol.sphere.getArea(geom, {projection:'EPSG:3857'});
+    return a >= 10000 ? (a / 10000).toLocaleString('it-IT', {maximumFractionDigits:2}) + ' ha'
+                      : a.toLocaleString('it-IT', {maximumFractionDigits:1}) + ' m²';
+  }
+  var l = ol.sphere.getLength(geom, {projection:'EPSG:3857'});
+  return l >= 1000 ? (l / 1000).toLocaleString('it-IT', {maximumFractionDigits:2}) + ' km'
+                   : l.toLocaleString('it-IT', {maximumFractionDigits:1}) + ' m';
+}
+function puntoEtichettaMisura(geom){
+  if (geom.getType() === 'Polygon') return geom.getInteriorPoint();
+  if (geom.getType() === 'LineString') return new ol.geom.Point(geom.getLastCoordinate());
+  return null;
+}
+function stileMisura(feature){
+  var g = feature.getGeometry();
+  var base = new ol.style.Style({
+    stroke:new ol.style.Stroke({color:'#d81b60', width:3, lineDash:[8,5]}),
+    fill:new ol.style.Fill({color:'rgba(216,27,96,.12)'})
+  });
+  var p = puntoEtichettaMisura(g);
+  if (!p) return base;
+  return [base, new ol.style.Style({
+    geometry:p,
+    image:new ol.style.Circle({radius:4, fill:new ol.style.Fill({color:'#fff'}), stroke:new ol.style.Stroke({color:'#d81b60',width:2})}),
+    text:new ol.style.Text({text:testoMisura(g), offsetY:-15, font:'600 12px Arial',
+      fill:new ol.style.Fill({color:'#111'}), stroke:new ol.style.Stroke({color:'#fff',width:4})})
+  })];
+}
+var stratoMisure = new ol.layer.Vector({source:sorgenteMisure, style:stileMisura, zIndex:9998});
+
+/* Perimetro dell'area demo: layer puramente cartografico, incluso nei dati
+   come CONFINE_DEMO. Non entra nelle esportazioni. */
+var sorgentePerimetro = new ol.source.Vector({
+  features: new ol.format.GeoJSON().readFeatures(CONFINE_DEMO, {
+    dataProjection: 'EPSG:4326',
+    featureProjection: 'EPSG:3857'
+  })
+});
+
+var stratoPerimetro = new ol.layer.Vector({
+  source: sorgentePerimetro,
+  visible: true,
+  zIndex: 9997,
+  style: new ol.style.Style({
+    stroke: new ol.style.Stroke({
+      color: '#d81b60',
+      width: 4,
+      lineDash: [12, 7]
+    }),
+    fill: new ol.style.Fill({
+      color: 'rgba(0,0,0,0)'
+    })
+  })
+});
+stratoPerimetro.set('perimetro', true);
+
+var estensione3857 = ol.proj.transformExtent(ESTENSIONE, 'EPSG:4326', 'EPSG:3857');
+
+var mappa = new ol.Map({
+  target: 'mappa',
+  layers: [sfondo].concat(livelliOL, [stratoPerimetro, stratoMisure, evidenziato]),
+  controls: ol.control.defaults.defaults({attribution: true, rotate: false})
+    .extend([new ol.control.ScaleLine({bar: false, minWidth: 90})]),
+  view: new ol.View({maxZoom: 24})
+});
+
+function conMisura(azione){
+  mappa.updateSize();
+  var dim = mappa.getSize();
+  if (!dim || !dim[0] || !dim[1]) { setTimeout(function(){ conMisura(azione); }, 60); return; }
+  azione(dim);
+}
+function inquadraTutto(durata){
+  conMisura(function(dim){
+    mappa.getView().fit(estensione3857,
+      {size: dim, padding: [30,30,30,30], duration: durata || 0});
+  });
+}
+
+/* ============================================================
+   3b. Street View, misure con snap e stampa
+   ============================================================ */
+var strumentoAttivo = null, interazioneMisura = null, snapAttivi = [];
+var notaStrumento = document.getElementById('nota-strumento');
+var btnStreet = document.getElementById('street-view');
+var btnLinea = document.getElementById('misura-linea');
+var btnArea = document.getElementById('misura-area');
+var btnSeleziona = document.getElementById('seleziona-geometrie');
+
+function aggiornaPulsantiStrumenti(){
+  btnStreet.classList.toggle('attivo', strumentoAttivo === 'street');
+  btnLinea.classList.toggle('attivo', strumentoAttivo === 'linea');
+  btnArea.classList.toggle('attivo', strumentoAttivo === 'area');
+  btnSeleziona.classList.toggle('attivo', strumentoAttivo === null);
+}
+function terminaStrumento(){
+  if (interazioneMisura) { mappa.removeInteraction(interazioneMisura); interazioneMisura = null; }
+  snapAttivi.forEach(function(x){ mappa.removeInteraction(x); });
+  snapAttivi = [];
+  strumentoAttivo = null;
+  aggiornaPulsantiStrumenti();
+  mappa.getTargetElement().style.cursor = '';
+  notaStrumento.textContent = 'Modalità selezione: clicca una geometria per visualizzarne gli attributi.';
+}
+function attivaSelezione(){
+  terminaStrumento();
+  chiudiScheda();
+  aggiornaPulsantiStrumenti();
+  notaStrumento.textContent = 'Modalità selezione: clicca una geometria per visualizzarne gli attributi.';
+}
+
+function attivaSnap(){
+  snapAttivi.forEach(function(x){ mappa.removeInteraction(x); });
+  snapAttivi = [];
+  livelliOL.forEach(function(layer){
+    var snap = new ol.interaction.Snap({source:layer.getSource(), vertex:true, edge:false});
+    mappa.addInteraction(snap); snapAttivi.push(snap);
+  });
+  var snapMisure = new ol.interaction.Snap({source:sorgenteMisure, vertex:true, edge:false});
+  mappa.addInteraction(snapMisure); snapAttivi.push(snapMisure);
+}
+function definizioneLayer(tabella){
+  for (var i=0;i<STILE.layers.length;i++) if (STILE.layers[i].table===tabella) return STILE.layers[i];
+  return null;
+}
+
+function attivaMisura(tipo){
+  terminaStrumento();
+  strumentoAttivo = tipo === 'Polygon' ? 'area' : 'linea';
+  interazioneMisura = new ol.interaction.Draw({
+    source:sorgenteMisure, type:tipo,
+    style:new ol.style.Style({
+      stroke:new ol.style.Stroke({color:'#d81b60',width:3,lineDash:[8,5]}),
+      fill:new ol.style.Fill({color:'rgba(216,27,96,.12)'}),
+      image:new ol.style.Circle({radius:5,fill:new ol.style.Fill({color:'#fff'}),stroke:new ol.style.Stroke({color:'#d81b60',width:2})})
+    })
+  });
+  mappa.addInteraction(interazioneMisura);
+  attivaSnap(); /* aggiunti dopo Draw: lo Snap ha priorità sugli eventi del cursore */
+  interazioneMisura.on('drawstart', function(){ chiudiScheda(); });
+  interazioneMisura.on('drawend', function(e){
+    setTimeout(function(){ e.feature.changed(); }, 0);
+  });
+  aggiornaPulsantiStrumenti();
+  notaStrumento.textContent = tipo === 'Polygon'
+    ? 'Clicca i vertici dell’area; doppio clic per terminare. Snap ai vertici attivo.'
+    : 'Clicca i vertici della linea; doppio clic per terminare. Snap ai vertici attivo.';
+}
+btnStreet.addEventListener('click', function(){
+  if (strumentoAttivo === 'street') { terminaStrumento(); return; }
+  terminaStrumento(); strumentoAttivo = 'street'; aggiornaPulsantiStrumenti();
+  notaStrumento.textContent = 'Clicca sulla mappa per aprire Street View in quel punto.';
+  mappa.getTargetElement().style.cursor = 'crosshair';
+});
+btnLinea.addEventListener('click', function(){ attivaMisura('LineString'); });
+btnArea.addEventListener('click', function(){ attivaMisura('Polygon'); });
+btnSeleziona.addEventListener('click', attivaSelezione);
+document.getElementById('pulisci-misure').addEventListener('click', function(){
+  sorgenteMisure.clear();
+  attivaSelezione();
+});
+aggiornaPulsantiStrumenti();
+
+function aggiornaLegendaStampa(){
+  var box = document.getElementById('legenda-stampa');
+  if (!trovate || !trovate.length) { box.innerHTML = '<strong>Legenda</strong>Nessuna area selezionata'; return; }
+  var t = trovate[indice], f = t.feature, L = t.def;
+  var codice = L.field ? f.get(L.field) : null;
+  var regola = codice && REGOLE[L.table] ? REGOLE[L.table][codice] : null;
+  var nome = regola ? (regola.label || '').replace(/^\(\d+\)\s*/, '') : (f.get('v_scr_te') || 'Elemento selezionato');
+  box.innerHTML = '<strong>Legenda area selezionata</strong>'
+    + '<div>' + nome + '</div><div style="margin-top:1mm;color:#555">'
+    + L.title + (codice ? ' · ' + codice : '') + '</div>';
+}
+document.getElementById('stampa-mappa').addEventListener('click', function(){
+  aggiornaLegendaStampa();
+  /* Il browser stampa direttamente i canvas della mappa, quindi conserva anche lo sfondo caricato. */
+  setTimeout(function(){ window.print(); }, 80);
+});
+
+/* ============================================================
+   4. Stato
+   ============================================================ */
+var stato = document.getElementById('stato');
+var avviso = document.getElementById('avviso');
+var SOGLIA = Math.max.apply(null, STILE.layers.map(function(L){ return L.minScale || 0; }));
+
+function attiviDi(L){
+  if (!livelloAcceso[L.table]) return 0;
+  if (!L.field) return L.total;
+  var n = 0;
+  L.rules.forEach(function(r){
+    if (acceso[L.table + '|' + r.value]) n += (L.counts[r.value] || 0);
+  });
+  return n;
+}
+
+function aggiornaStato(){
+  var s = Math.round(scalaDa(mappa.getView().getResolution()));
+  var tot = 0;
+  STILE.layers.forEach(function(L){ tot += attiviDi(L); });
+  stato.innerHTML = 'scala <b>1:' + s.toLocaleString('it-IT') + '</b> \u00b7 <b>'
+                  + tot.toLocaleString('it-IT') + '</b> elementi attivi';
+  if (inErrore) return;
+  if (SOGLIA > 0 && s > SOGLIA && !forzaScala.checked) {
+    avviso.textContent = 'Il database topografico è visibile solo fino a 1:'
+      + SOGLIA.toLocaleString('it-IT')
+      + '. Ingrandisci, oppure togli la soglia nel pannello.';
+    avviso.classList.add('visibile');
+  } else {
+    avviso.classList.remove('visibile');
+  }
+}
+mappa.on('moveend', aggiornaStato);
+forzaScala.addEventListener('change', function(){
+  salvaPreferenzeVisualizzazione();
+  ridisegna();
+  aggiornaStato();
+});
+
+/* ============================================================
+   5. Elenco dei livelli
+   ============================================================ */
+var elencoLivelli = document.getElementById('elenco-livelli');
+
+/* Perimetro dell'area demo: layer cartografico separato dai dati del progetto. */
+var rigaConfine = document.createElement('label');
+rigaConfine.className = 'livello';
+
+var checkConfine = document.createElement('input');
+checkConfine.type = 'checkbox';
+checkConfine.checked = true;
+checkConfine.addEventListener('change', function(){
+  stratoPerimetro.setVisible(checkConfine.checked);
+});
+
+var nomeConfine = document.createElement('span');
+nomeConfine.textContent = 'Perimetro area demo';
+
+var spazioConfine = document.createElement('span');
+spazioConfine.className = 'quanti';
+spazioConfine.textContent = '';
+
+rigaConfine.appendChild(checkConfine);
+rigaConfine.appendChild(nomeConfine);
+rigaConfine.appendChild(spazioConfine);
+elencoLivelli.appendChild(rigaConfine);
+
+STILE.layers.slice().reverse().forEach(function(L){
+  var riga = document.createElement('label');
+  riga.className = 'livello';
+  var s = document.createElement('input');
+  s.type = 'checkbox'; s.checked = !!livelloAcceso[L.table]; s.dataset.layerTable = L.table;
+  s.addEventListener('change', function(){
+    livelloAcceso[L.table] = s.checked;
+    salvaPreferenzeVisualizzazione();
+    ridisegna(); aggiornaStato();
+  });
+  var n = document.createElement('span');
+  n.textContent = L.title + (L.labels ? ' (etichette)' : '');
+  var q = document.createElement('span');
+  q.className = 'quanti';
+  q.textContent = L.total.toLocaleString('it-IT');
+  riga.appendChild(s); riga.appendChild(n); riga.appendChild(q);
+  elencoLivelli.appendChild(riga);
+});
+
+/* ============================================================
+   5b. Ricerca catastale Foglio + Particella
+   ============================================================ */
+var catastoFoglio = document.getElementById('catasto-foglio');
+var catastoParticella = document.getElementById('catasto-particella');
+var catastoEsito = document.getElementById('catasto-esito');
+var btnCercaCatasto = document.getElementById('cerca-catasto');
+var indiceCatasto = {};
+
+function normalizzaFoglio(v){
+  v = String(v == null ? '' : v).trim();
+  if (/^\d+$/.test(v)) return String(parseInt(v,10)).padStart(4,'0');
+  return v.toUpperCase();
+}
+function normalizzaParticella(v){
+  v = String(v == null ? '' : v).trim();
+  if (/^\d+$/.test(v)) return String(parseInt(v,10));
+  return v.toUpperCase();
+}
+(function costruisciIndiceCatasto(){
+  var layer = layerDaTabella('catasto_particelle');
+  if (!layer) return;
+  layer.getSource().getFeatures().forEach(function(f){
+    var k = normalizzaFoglio(f.get('foglio')) + '|' + normalizzaParticella(f.get('particella'));
+    indiceCatasto[k] = f;
+  });
+})();
+
+function cercaParticellaCatastale(){
+  var foglio = normalizzaFoglio(catastoFoglio.value);
+  var particella = normalizzaParticella(catastoParticella.value);
+  if (!foglio || !particella) {
+    catastoEsito.textContent = 'Inserisci sia il foglio sia la particella.';
+    return;
+  }
+  var f = indiceCatasto[foglio + '|' + particella];
+  if (!f) {
+    catastoEsito.textContent = 'Nessuna particella trovata per Foglio ' + foglio + ', Particella ' + particella + '.';
+    return;
+  }
+  livelloAcceso.catasto_particelle = true;
+  acceso['catasto_particelle|particella'] = true;
+  var cb = document.querySelector('input[data-layer-table="catasto_particelle"]');
+  if (cb) cb.checked = true;
+  costruisciLegenda();
+  ridisegna(); aggiornaStato();
+
+  var ext = f.getGeometry().getExtent();
+  mappa.getView().fit(ext, {padding:[70,70,70,70], duration:450, maxZoom:20});
+  trovate = [{feature:f, def:CATASTO_DEF}];
+  mostra(0);
+  catastoEsito.textContent = 'Trovata: Foglio ' + f.get('foglio') + ', Particella ' + f.get('particella') + '.';
+}
+btnCercaCatasto.addEventListener('click', cercaParticellaCatastale);
+[catastoFoglio, catastoParticella].forEach(function(el){
+  el.addEventListener('keydown', function(e){
+    if (e.key === 'Enter') { e.preventDefault(); cercaParticellaCatastale(); }
+  });
+});
+
+/* ============================================================
+   6. Legenda
+   ============================================================ */
+var legenda = document.getElementById('legenda');
+var cacheImmagini = {};
+var aperti = {};
+
+function caricaSvg(chiave){
+  if (!cacheImmagini[chiave]) {
+    var img = new Image();
+    img.src = STILE.svg[chiave];
+    cacheImmagini[chiave] = img;
+  }
+  return cacheImmagini[chiave];
+}
+
+function disegnaCampione(canvas, regola){
+  var r = window.devicePixelRatio || 1;
+  var L = 62, A = 24;
+  canvas.width = L * r; canvas.height = A * r;
+  canvas.style.width = L + 'px'; canvas.style.height = A + 'px';
+  var g = canvas.getContext('2d');
+  g.scale(r, r);
+  g.clearRect(0, 0, L, A);
+  var y = A / 2;
+
+  regola.parts.forEach(function(p){
+    if (p.kind === 'fill' || p.kind === 'svgfill') {
+      if (p.kind === 'fill' && p.fill) { g.fillStyle = p.fill; g.fillRect(2, 3, L-4, A-6); }
+      if (p.kind === 'svgfill' && p.svg) {
+        var im = caricaSvg(p.svg);
+        var traccia = function(){
+          g.save(); g.beginPath(); g.rect(2, 3, L-4, A-6); g.clip();
+          var lato = Math.max(4, p.tile);
+          for (var x = 2; x < L-2; x += lato)
+            for (var yy = 3; yy < A-3; yy += lato) g.drawImage(im, x, yy, lato, lato);
+          g.restore();
+          if (p.stroke) { g.strokeStyle = p.stroke; g.lineWidth = Math.max(p.width, .7);
+                          g.strokeRect(2, 3, L-4, A-6); }
+        };
+        if (im.complete && im.naturalWidth) traccia();
+        else im.addEventListener('load', traccia, {once: true});
+        return;
+      }
+      if (p.stroke) { g.strokeStyle = p.stroke; g.lineWidth = Math.max(p.width, .7);
+                      g.strokeRect(2, 3, L-4, A-6); }
+    }
+  });
+
+  regola.parts.forEach(function(p){
+    if (p.kind !== 'line') return;
+    g.save();
+    g.strokeStyle = p.color; g.lineWidth = Math.max(p.width, 0.7);
+    g.lineCap = p.cap === 'butt' ? 'butt' : p.cap;
+    if (p.dash) g.setLineDash(p.dash);
+    g.beginPath(); g.moveTo(2, y); g.lineTo(L - 2, y); g.stroke();
+    g.restore();
+  });
+
+  regola.parts.forEach(function(p){
+    if (p.kind === 'markerline' && p.svg) {
+      var im = caricaSvg(p.svg), s = p.size, passo = Math.max(p.interval, 1.5);
+      var traccia = function(){
+        for (var x = 2; x < L - 1; x += passo) g.drawImage(im, x - s/2, y - s/2, s, s);
+      };
+      if (im.complete && im.naturalWidth) traccia();
+      else im.addEventListener('load', traccia, {once: true});
+    } else if (p.kind === 'marker' && p.svg) {
+      var im2 = caricaSvg(p.svg), s2 = Math.min(p.size, A);
+      var traccia2 = function(){ g.drawImage(im2, L/2 - s2/2, y - s2/2, s2, s2); };
+      if (im2.complete && im2.naturalWidth) traccia2();
+      else im2.addEventListener('load', traccia2, {once: true});
+    }
+  });
+}
+
+function costruisciLegenda(){
+  var filtro = document.getElementById('cerca').value.trim().toLowerCase();
+  var soloPresenti = document.getElementById('solo-presenti').checked;
+  legenda.innerHTML = '';
+  var qualcosa = false;
+
+  /* Un gruppo richiuso per macro-livello: dentro, tutti i suoi elementi,
+     separati da sottotitoli di famiglia per non perdersi nelle liste lunghe. */
+  STILE.layers.slice().reverse().forEach(function(L){
+    var elenco = L.rules.filter(function(r){
+      if (soloPresenti && !L.counts[r.value]) return false;
+      if (!filtro) return true;
+      return (r.value + ' ' + (r.label || '')).toLowerCase().indexOf(filtro) !== -1;
+    });
+    if (!elenco.length) return;
+    qualcosa = true;
+
+    var espanso = filtro ? true : !!aperti[L.table];
+
+    var testa = document.createElement('button');
+    testa.className = 'gruppo-testa';
+    testa.type = 'button';
+    testa.setAttribute('aria-expanded', espanso ? 'true' : 'false');
+
+    var spuntaGruppo = document.createElement('input');
+    spuntaGruppo.type = 'checkbox';
+    spuntaGruppo.setAttribute('aria-label', 'Accendi o spegni tutto il livello');
+
+    var nome = document.createElement('span');
+    nome.className = 'gruppo-nome';
+    nome.innerHTML = L.title + ' <i>' + L.table + '</i>';
+
+    var quanti = document.createElement('span');
+    quanti.className = 'gruppo-conteggio';
+
+    var freccia = document.createElement('span');
+    freccia.className = 'freccia';
+    freccia.textContent = '\u276f';
+
+    testa.appendChild(spuntaGruppo); testa.appendChild(nome);
+    testa.appendChild(quanti); testa.appendChild(freccia);
+
+    var corpo = document.createElement('div');
+    corpo.className = 'gruppo-corpo';
+    corpo.hidden = !espanso;
+
+    var daDisegnare = [];
+    function disegnaSospesi(){
+      while (daDisegnare.length) {
+        var d = daDisegnare.pop();
+        disegnaCampione(d.tela, d.regola);
+      }
+    }
+    function aggiornaTesta(){
+      var n = elenco.filter(function(r){ return acceso[L.table + '|' + r.value]; }).length;
+      spuntaGruppo.checked = n > 0;
+      spuntaGruppo.indeterminate = n > 0 && n < elenco.length;
+      quanti.textContent = n + '/' + elenco.length;
+    }
+
+    testa.addEventListener('click', function(e){
+      if (e.target === spuntaGruppo) return;
+      var ora = corpo.hidden;
+      corpo.hidden = !ora;
+      testa.setAttribute('aria-expanded', ora ? 'true' : 'false');
+      if (ora) disegnaSospesi();
+      if (!filtro) aperti[L.table] = ora;
+    });
+    spuntaGruppo.addEventListener('click', function(e){ e.stopPropagation(); });
+    spuntaGruppo.addEventListener('change', function(){
+      var val = spuntaGruppo.checked;
+      elenco.forEach(function(r){ acceso[L.table + '|' + r.value] = val; });
+      corpo.querySelectorAll('input[type=checkbox]').forEach(function(c){ c.checked = val; });
+      corpo.querySelectorAll('.voce').forEach(function(v){ v.classList.toggle('spenta', !val); });
+      aggiornaTesta(); ridisegna(); aggiornaStato();
+    });
+
+    /* ordina per famiglia, poi per codice */
+    var ordinate = elenco.slice().sort(function(a, b){
+      var fa = famiglia(a.value), fb = famiglia(b.value);
+      if (fa === '?' && fb === '?') return 0;   /* resta l'ordine definito nello stile */
+      if (fa !== fb) return fa < fb ? -1 : 1;
+      return a.value < b.value ? -1 : 1;
+    });
+
+    var distinte = {};
+    ordinate.forEach(function(r){ distinte[famiglia(r.value)] = 1; });
+    var mostraSottotitoli = Object.keys(distinte).length > 1;
+
+    var famigliaCorrente = null;
+    ordinate.forEach(function(r){
+      var f = famiglia(r.value);
+      if (mostraSottotitoli && f !== famigliaCorrente) {
+        famigliaCorrente = f;
+        var titolo = document.createElement('div');
+        titolo.className = 'sotto-titolo';
+        titolo.textContent = FAMIGLIE[f] || ('Codici ' + f + 'xx');
+        corpo.appendChild(titolo);
+      }
+
+      var chiaveVoce = L.table + '|' + r.value;
+      var riga = document.createElement('label');
+      riga.className = 'voce' + (acceso[chiaveVoce] ? '' : ' spenta')
+                     + (L.counts[r.value] ? '' : ' assente');
+
+      var spunta = document.createElement('input');
+      spunta.type = 'checkbox';
+      spunta.checked = acceso[chiaveVoce];
+      spunta.addEventListener('change', function(){
+        acceso[chiaveVoce] = spunta.checked;
+        riga.classList.toggle('spenta', !spunta.checked);
+        salvaPreferenzeVisualizzazione();
+        aggiornaTesta(); ridisegna(); aggiornaStato();
+      });
+
+      var campione = document.createElement('canvas');
+      campione.className = 'campione';
+      campione.width = 62; campione.height = 24;
+      daDisegnare.push({tela: campione, regola: r});
+
+      var testo = document.createElement('span');
+      testo.innerHTML = '<span class="etichetta">'
+        + (r.label || '').replace(/^\(\d+\)\s*/, '') + '</span><br>'
+        + '<span class="codice">' + r.value + '</span> '
+        + '<span class="conteggio">' + (L.counts[r.value]
+            ? L.counts[r.value].toLocaleString('it-IT') + (L.counts[r.value] === 1 ? ' elemento' : ' elementi')
+            : 'nessun elemento') + '</span>';
+
+      riga.appendChild(spunta); riga.appendChild(campione); riga.appendChild(testo);
+      corpo.appendChild(riga);
+    });
+
+    aggiornaTesta();
+    if (espanso) disegnaSospesi();
+    legenda.appendChild(testa);
+    legenda.appendChild(corpo);
+  });
+
+  if (!qualcosa) {
+    var vuoto = document.createElement('p');
+    vuoto.className = 'vuoto';
+    vuoto.textContent = 'Nessuna voce corrisponde. Svuota il filtro per rivedere l\u2019elenco.';
+    legenda.appendChild(vuoto);
+  }
+}
+
+document.getElementById('cerca').addEventListener('input', costruisciLegenda);
+document.getElementById('solo-presenti').addEventListener('change', function(){
+  salvaPreferenzeVisualizzazione();
+  costruisciLegenda();
+});
+document.getElementById('accendi-tutto').addEventListener('click', function(){
+  for (var k in acceso) acceso[k] = true;
+  costruisciLegenda(); ridisegna(); aggiornaStato();
+});
+document.getElementById('spegni-tutto').addEventListener('click', function(){
+  for (var k in acceso) acceso[k] = false;
+  costruisciLegenda(); ridisegna(); aggiornaStato();
+});
+document.getElementById('inquadra').addEventListener('click', function(){ inquadraTutto(260); });
+
+/* ---- sfondo ---- */
+var sceltaSfondo = document.getElementById('sfondo');
+var velatura = document.getElementById('velatura');
+var opacita = document.getElementById('opacita');
+var opacitaValore = document.getElementById('opacita-valore');
+var falliti = 0, timerFalliti = null;
+
+sceltaSfondo.addEventListener('change', function(){
+  var v = this.value;
+  salvaPreferenzeVisualizzazione();
+  falliti = 0;
+  if (!v) { sfondo.setVisible(false); velatura.hidden = true; return; }
+  var s = SORGENTI[v].fai();
+  s.on('tileloaderror', function(){
+    falliti++;
+    clearTimeout(timerFalliti);
+    timerFalliti = setTimeout(function(){
+      if (falliti > 2 && sceltaSfondo.value === v) {
+        segnala(SORGENTI[v].etichetta + ': il servizio non risponde o non copre '
+              + 'questa zona. Prova un altro anno, oppure controlla la connessione.');
+      }
+    }, 1500);
+  });
+  sfondo.setSource(s); sfondo.setVisible(true); velatura.hidden = false;
+});
+opacita.addEventListener('input', function(){
+  sfondo.setOpacity(this.value / 100);
+  opacitaValore.textContent = this.value + '%';
+  salvaPreferenzeVisualizzazione();
+});
+
+/* Ripristino controlli visuali dopo il caricamento della pagina. */
+if (typeof preferenzeVisualizzazione.soloPresenti === 'boolean') {
+  document.getElementById('solo-presenti').checked =
+    preferenzeVisualizzazione.soloPresenti;
+}
+
+if (typeof preferenzeVisualizzazione.forzaScala === 'boolean') {
+  forzaScala.checked = preferenzeVisualizzazione.forzaScala;
+}
+
+if (preferenzeVisualizzazione.opacita !== undefined) {
+  opacita.value = preferenzeVisualizzazione.opacita;
+  sfondo.setOpacity(Number(opacita.value) / 100);
+  opacitaValore.textContent = opacita.value + '%';
+}
+
+if (preferenzeVisualizzazione.sfondo !== undefined &&
+    (preferenzeVisualizzazione.sfondo === '' ||
+     SORGENTI[preferenzeVisualizzazione.sfondo])) {
+  sceltaSfondo.value = preferenzeVisualizzazione.sfondo;
+  sceltaSfondo.dispatchEvent(new Event('change'));
+}
+
+/* ============================================================
+   7. Interrogazione
+   ============================================================ */
+var scheda = document.getElementById('scheda');
+var schedaTitolo = document.getElementById('scheda-titolo');
+var schedaAttributi = document.getElementById('scheda-attributi');
+var navigatore = document.getElementById('scheda-navigatore');
+var posizione = document.getElementById('posizione');
+var trovate = [], indice = 0;
+function nomeCampo(L, nome){ return NOMI[nome] || nome; }
+
+var NOMI = {
+  fid: 'fid', layer: 'codice layer',
+  v_lin_cl: 'classe', v_lin_lt: 'tipo linea', lin_el_id: 'id elemento',
+  v_pnt_cl: 'classe', v_pnt_ang: 'angolo', v_pnt_sc: 'scala', v_pnt_sy: 'simbolo',
+  v_pol_cl: 'classe', v_pol_ty: 'tipologia', v_pol_uso: 'uso', v_pol_id: 'id unità vol.',
+  v_scr_te: 'testo', v_scr_alt: 'altezza', v_scr_aor: 'orientamento',
+  v_scr_cl: 'classe', v_scr_top: 'toponimo',
+  numero: 'numero civico', accesso: 'accesso', stato_targa: 'stato targa',
+  passocarr: 'passo carrabile', via: 'via', indirizzo: 'indirizzo', civico: 'civico', esponente: 'esponente',
+  uv_id: 'id unità vol.', tipo_supporto: 'supporto', anno_posa: 'anno posa', presente: 'presente',
+  tronco: 'tronco', classe_str: 'classe funzionale', lungh_m: 'lunghezza (m)', largh_m: 'larghezza (m)',
+  pavimentazione: 'pavimentazione', senso_marcia: 'senso di marcia',
+  un_vol_id: 'id unità vol.', un_vol_av: 'altezza (m)', classe_h: 'classe altezza', piani: 'piani',
+  destinazione: 'destinazione', vol_mc: 'volume (m³)', sup_mq: 'superficie (m²)', denominazione: 'denominazione',
+  foglio: 'foglio', particella: 'particella', qualita: 'qualità', classe: 'classe',
+  zona: 'zona', descrizione: 'descrizione', if_mc_mq: 'indice fond. (mc/mq)', h_max_m: 'altezza max (m)',
+  rc_max_pct: 'rapp. copertura max (%)', destinazioni: 'destinazioni d’uso', interventi: 'interventi ammessi',
+  art_nta: 'articolo NTA', elaborato: 'elaborato',
+  vincolo: 'vincolo', ampiezza_m: 'ampiezza (m)', prescrizione: 'prescrizione',
+  scheda: 'scheda norma', tipo: 'tipo', stato: 'stato attuazione', convenzione: 'convenzione',
+  slp_max_mq: 'SLP max (m²)', standard_mq: 'standard (m²)', ambito: 'ambito',
+  famiglia: 'famiglia di rischio', pericolosita: 'codice pericolosità', tr_anni: 'tempo di ritorno (anni)',
+  scenario: 'scenario', codice: 'codice', tipologia: 'tipologia', capienza_persone: 'capienza (persone)',
+  servizi: 'servizi', proprieta: 'proprietà', scenari: 'scenari', in_area_rischio: 'in area a rischio',
+  scheda_piano: 'scheda del piano', funzione: 'funzione', h24: 'presidio h24', da: 'da', a: 'a',
+  larghezza_min_m: 'larghezza min (m)', sup_ha: 'superficie (ha)'
+};
+
+function layerDaTabella(tabella){
+  for (var i=0; i<livelliOL.length; i++) {
+    var d = livelliOL[i].get('def');
+    if (d && d.table === tabella) return livelliOL[i];
+  }
+  return null;
+}
+function campiLayer(L){
+  var layer = layerDaTabella(L.table), visti = {}, campi = [];
+  if (!layer) return campi;
+  layer.getSource().getFeatures().forEach(function(f){
+    var p = f.getProperties();
+    Object.keys(p).forEach(function(k){
+      if (k === f.getGeometryName() || visti[k] || k.indexOf('__') === 0) return;
+      visti[k] = true; campi.push(k);
+    });
+  });
+  campi.sort(function(a,b){
+    if (a === 'fid') return -1; if (b === 'fid') return 1;
+    if (a === L.field) return -1; if (b === L.field) return 1;
+    return a.localeCompare(b, 'it');
+  });
+  return campi;
+}
+function scaricaLayerGeoJSON(L){
+  var layer=layerDaTabella(L.table); if (!layer) return;
+  var obj=lettore.writeFeaturesObject(layer.getSource().getFeatures(), {dataProjection:'EPSG:4326', featureProjection:'EPSG:3857'});
+  var blob=new Blob([JSON.stringify(obj,null,2)], {type:'application/geo+json;charset=utf-8'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=L.table + '.geojson';
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(a.href); },1000);
+}
+function scaricaBlob(blob,nome){
+  var a=document.createElement('a'), u=URL.createObjectURL(blob); a.href=u; a.download=nome;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(u);},1500);
+}
+function definizioniDaScelta(valore){
+  if (valore==='__ALL__') return STILE.layers.slice();
+  return STILE.layers.filter(function(L){return L.table===valore;});
+}
+function esportaGeoJSONScelta(valore){
+  var defs=definizioniDaScelta(valore); if (!defs.length) return;
+  if (defs.length===1) { scaricaLayerGeoJSON(defs[0]); return; }
+  var tutte=[];
+  defs.forEach(function(L){
+    var layer=layerDaTabella(L.table); if (!layer) return;
+    var obj=lettore.writeFeaturesObject(layer.getSource().getFeatures(),{dataProjection:'EPSG:4326',featureProjection:'EPSG:3857'});
+    (obj.features||[]).forEach(function(ft){ ft.properties=ft.properties||{}; ft.properties.__layer=L.table; ft.properties.__layer_title=L.title; tutte.push(ft); });
+  });
+  scaricaBlob(new Blob([JSON.stringify({type:'FeatureCollection',features:tutte},null,2)],{type:'application/geo+json;charset=utf-8'}),'webgis_demo_tutti_layer.geojson');
+}
+function sqlIdent(nome){ return '"'+String(nome).replace(/"/g,'""')+'"'; }
+function tipoSqlValori(vals){
+  var nonnull=vals.filter(function(v){return v!==null && v!==undefined && v!=='';});
+  if (!nonnull.length) return 'TEXT';
+  if (nonnull.every(function(v){return typeof v==='boolean' || (typeof v==='number' && Number.isInteger(v));})) return 'INTEGER';
+  if (nonnull.every(function(v){return typeof v==='number';})) return 'REAL';
+  return 'TEXT';
+}
+function wkbGeometry(geom){
+  var t=geom.getType(), c=geom.getCoordinates(), bytes=[];
+  function u8(v){bytes.push(v&255);} function u32(v){for(var i=0;i<4;i++)bytes.push((v>>>(8*i))&255);}
+  function f64(v){var b=new ArrayBuffer(8),d=new DataView(b);d.setFloat64(0,v,true);for(var i=0;i<8;i++)bytes.push(d.getUint8(i));}
+  function point(x){u8(1);u32(1);f64(x[0]);f64(x[1]);}
+  function line(x){u8(1);u32(2);u32(x.length);x.forEach(function(p){f64(p[0]);f64(p[1]);});}
+  function poly(x){u8(1);u32(3);u32(x.length);x.forEach(function(r){u32(r.length);r.forEach(function(p){f64(p[0]);f64(p[1]);});});}
+  if(t==='Point') point(c);
+  else if(t==='LineString') line(c);
+  else if(t==='Polygon') poly(c);
+  else if(t==='MultiPoint'){u8(1);u32(4);u32(c.length);c.forEach(point);}
+  else if(t==='MultiLineString'){u8(1);u32(5);u32(c.length);c.forEach(line);}
+  else if(t==='MultiPolygon'){u8(1);u32(6);u32(c.length);c.forEach(poly);}
+  else throw new Error('Geometria non supportata: '+t);
+  return new Uint8Array(bytes);
+}
+function gpkgGeomBlob(feature){
+  var g=feature.getGeometry().clone().transform('EPSG:3857','EPSG:4326'), w=wkbGeometry(g), out=new Uint8Array(8+w.length), dv=new DataView(out.buffer);
+  out[0]=0x47;out[1]=0x50;out[2]=0;out[3]=1; dv.setInt32(4,4326,true); out.set(w,8); return out;
+}
+function geometryTypeName(features){
+  for(var i=0;i<features.length;i++){var g=features[i].getGeometry();if(g)return g.getType().toUpperCase();}
+  return 'GEOMETRY';
+}
+function campoGpkgNome(k, usati){
+  var n=String(k||'campo').replace(/[^A-Za-z0-9_]/g,'_'); if(!n)n='campo'; if(/^\d/.test(n))n='f_'+n;
+  var base=n,j=2;while(usati[n])n=base+'_'+j++;usati[n]=true;return n;
+}
+var SQLJS_BASE='https://cdn.jsdelivr.net/npm/sql.js@1.13.0/dist/';
+function caricaSqlJs(){
+  if (typeof initSqlJs==='function') return Promise.resolve(initSqlJs);
+  if (window.__sqlJsPromise) return window.__sqlJsPromise;
+  window.__sqlJsPromise=new Promise(function(resolve,reject){
+    var sc=document.createElement('script'); sc.src=SQLJS_BASE+'sql-wasm.js'; sc.async=true;
+    sc.onload=function(){ if(typeof initSqlJs==='function') resolve(initSqlJs); else reject(new Error('sql.js non inizializzato')); };
+    sc.onerror=function(){ reject(new Error('Impossibile caricare la libreria GeoPackage')); };
+    document.head.appendChild(sc);
+  });
+  return window.__sqlJsPromise;
+}
+async function esportaGeoPackageScelta(valore){
+  var nota=document.getElementById('nota-export');
+  nota.textContent='Creazione GeoPackage in corso…';
+  try{
+    var init=await caricaSqlJs();
+    var SQL=await init({locateFile:function(file){return SQLJS_BASE+file;}}), db=new SQL.Database();
+    db.run('PRAGMA application_id=1196444487; PRAGMA user_version=10300;');
+    db.run("CREATE TABLE gpkg_spatial_ref_sys (srs_name TEXT NOT NULL, srs_id INTEGER NOT NULL PRIMARY KEY, organization TEXT NOT NULL, organization_coordsys_id INTEGER NOT NULL, definition TEXT NOT NULL, description TEXT);");
+    db.run("INSERT INTO gpkg_spatial_ref_sys VALUES ('Undefined Cartesian',-1,'NONE',-1,'undefined','undefined Cartesian coordinate reference system'); INSERT INTO gpkg_spatial_ref_sys VALUES ('Undefined Geographic',0,'NONE',0,'undefined','undefined geographic coordinate reference system'); INSERT INTO gpkg_spatial_ref_sys VALUES ('WGS 84',4326,'EPSG',4326,'GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433]]','longitude/latitude coordinates in decimal degrees on the WGS 84 spheroid');");
+    db.run("CREATE TABLE gpkg_contents (table_name TEXT NOT NULL PRIMARY KEY, data_type TEXT NOT NULL, identifier TEXT UNIQUE, description TEXT DEFAULT '', last_change DATETIME NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')), min_x DOUBLE, min_y DOUBLE, max_x DOUBLE, max_y DOUBLE, srs_id INTEGER, CONSTRAINT fk_gc_r_srs_id FOREIGN KEY (srs_id) REFERENCES gpkg_spatial_ref_sys(srs_id));");
+    db.run("CREATE TABLE gpkg_geometry_columns (table_name TEXT NOT NULL, column_name TEXT NOT NULL, geometry_type_name TEXT NOT NULL, srs_id INTEGER NOT NULL, z TINYINT NOT NULL, m TINYINT NOT NULL, CONSTRAINT pk_geom_cols PRIMARY KEY (table_name,column_name), CONSTRAINT fk_gc_tn FOREIGN KEY (table_name) REFERENCES gpkg_contents(table_name), CONSTRAINT fk_gc_srs FOREIGN KEY (srs_id) REFERENCES gpkg_spatial_ref_sys(srs_id));");
+    var defs=definizioniDaScelta(valore), usatiT={};
+    defs.forEach(function(L){
+      var lay=layerDaTabella(L.table);if(!lay)return;var feats=lay.getSource().getFeatures();
+      var tab=campoGpkgNome(L.table,usatiT), campi=campiLayer(L), map={}, used={fid:true,geom:true};
+      campi.forEach(function(k){map[k]=campoGpkgNome(k,used);});
+      var colDefs=campi.map(function(k){var vals=feats.map(function(f){return f.get(k);});return sqlIdent(map[k])+' '+tipoSqlValori(vals);});
+      db.run('CREATE TABLE '+sqlIdent(tab)+' (fid INTEGER PRIMARY KEY AUTOINCREMENT, geom BLOB'+(colDefs.length?', '+colDefs.join(', '):'')+');');
+      db.run("INSERT INTO gpkg_contents(table_name,data_type,identifier,description,srs_id) VALUES (?,?,?,?,4326)",[tab,'features',L.title,'Esportato dal WebGIS demo (dati fittizi)']);
+      db.run("INSERT INTO gpkg_geometry_columns(table_name,column_name,geometry_type_name,srs_id,z,m) VALUES (?,?,?,?,0,0)",[tab,'geom',geometryTypeName(feats),4326]);
+      var qs=['?'].concat(campi.map(function(){return '?';})).join(','), stmt=db.prepare('INSERT INTO '+sqlIdent(tab)+' (geom'+(campi.length?', '+campi.map(function(k){return sqlIdent(map[k]);}).join(', '):'')+') VALUES ('+qs+')');
+      feats.forEach(function(f){
+        var vals=[gpkgGeomBlob(f)]; campi.forEach(function(k){var v=f.get(k);if(typeof v==='boolean')v=v?1:0;else if(v!==null&&v!==undefined&&typeof v!=='number')v=String(v);vals.push(v===undefined?null:v);}); stmt.run(vals);
+      }); stmt.free();
+    });
+    var out=db.export();db.close();scaricaBlob(new Blob([out],{type:'application/geopackage+sqlite3'}),valore==='__ALL__'?'webgis_demo_tutti_layer.gpkg':valore+'.gpkg');
+    nota.textContent='GeoPackage creato correttamente.';
+  }catch(err){console.error(err);nota.textContent='Errore nella creazione del GeoPackage.';segnala('Errore GeoPackage: '+(err.message||err));}
+}
+function inizializzaExport(){
+  var sel=document.getElementById('export-layer'); if(!sel)return;
+  STILE.layers.slice().reverse().forEach(function(L){var o=document.createElement('option');o.value=L.table;o.textContent=L.title+' — '+L.table;sel.appendChild(o);});
+  document.getElementById('export-geojson').addEventListener('click',function(){esportaGeoJSONScelta(sel.value);});
+  document.getElementById('export-gpkg').addEventListener('click',function(){esportaGeoPackageScelta(sel.value);});
+}
+inizializzaExport();
+function mostraAttributi(f, L){
+  schedaAttributi.innerHTML = '';
+  var p = f.getProperties();
+  Object.keys(p).forEach(function(k){
+    if (k === f.getGeometryName() || k.indexOf('__') === 0) return;
+    var riga = document.createElement('div'); riga.className = 'attributo';
+    var dt = document.createElement('dt'); dt.textContent = nomeCampo(L, k);
+    var dd = document.createElement('dd');
+    var v = p[k];
+    dd.textContent = v === null || v === undefined ? '' : (typeof v === 'boolean' ? (v ? 'Sì' : 'No') : v);
+    riga.appendChild(dt); riga.appendChild(dd); schedaAttributi.appendChild(riga);
+  });
+}
+
+
+function mostra(i){
+  if (!trovate.length) return;
+  indice = (i + trovate.length) % trovate.length;
+  var t = trovate[indice];
+  var f = t.feature, L = t.def;
+  var codice = L.field ? f.get(L.field) : null;
+  var regola = codice ? REGOLE[L.table][codice] : null;
+
+  var titoloElemento = L.table === 'catasto_particelle'
+    ? ('Foglio ' + (f.get('foglio') || '') + ' · Particella ' + (f.get('particella') || ''))
+    : (f.get('denominazione') || f.get('indirizzo') || f.get('via')
+       || (regola ? (regola.label || '').replace(/^\(\d+\)\s*/, '') : null)
+       || f.get('v_scr_te') || 'Elemento');
+  schedaTitolo.innerHTML = escapeHtml(titoloElemento)
+    + '<small>' + L.title + ' · ' + L.table + '</small>';
+
+  mostraAttributi(f,L);
+
+  evidenziato.getSource().clear();
+  evidenziato.getSource().addFeature(f.clone());
+
+  navigatore.hidden = trovate.length < 2;
+  posizione.textContent = (indice + 1) + ' di ' + trovate.length;
+  scheda.classList.add('visibile');
+  requestAnimationFrame(sistemaPosizioneStatisticheGIS);
+  aggiornaLegendaStampa();
+}
+
+function chiudiScheda(){
+  scheda.classList.remove('visibile');
+  requestAnimationFrame(sistemaPosizioneStatisticheGIS);
+  evidenziato.getSource().clear();
+  trovate = [];
+  aggiornaLegendaStampa();
+}
+
+
+mappa.on('singleclick', function(e){
+  if (strumentoAttivo === 'street') {
+    var ll = ol.proj.toLonLat(e.coordinate);
+    var url = 'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='
+      + ll[1].toFixed(7) + ',' + ll[0].toFixed(7);
+    window.open(url, '_blank', 'noopener');
+    attivaSelezione();
+    return;
+  }
+  if (strumentoAttivo === 'linea' || strumentoAttivo === 'area') return;
+  trovate = [];
+  mappa.forEachFeatureAtPixel(e.pixel, function(f, strato){
+    if (!strato || strato === evidenziato) return;
+    var L = strato.get('def');
+    if (!L || !livelloAcceso[L.table]) return;
+    if (L.field && !acceso[L.table + '|' + f.get(L.field)]) return;
+    trovate.push({feature: f, def: L});
+  }, {hitTolerance: 5});
+  if (trovate.length) mostra(0); else chiudiScheda();
+});
+
+mappa.on('pointermove', function(e){
+  if (e.dragging) return;
+  if (strumentoAttivo === 'street' || strumentoAttivo === 'linea' || strumentoAttivo === 'area') {
+    mappa.getTargetElement().style.cursor = 'crosshair';
+    return;
+  }
+  var sopra = mappa.forEachFeatureAtPixel(e.pixel, function(f, s){
+    return s && s !== evidenziato && s !== stratoMisure && s.get('def');
+  }, {hitTolerance: 5});
+  mappa.getTargetElement().style.cursor = sopra ? 'pointer' : '';
+});
+
+
+
+document.getElementById('scheda-chiudi').addEventListener('click', chiudiScheda);
+document.getElementById('prec').addEventListener('click', function(){ mostra(indice - 1); });
+document.getElementById('succ').addEventListener('click', function(){ mostra(indice + 1); });
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') chiudiScheda(); });
+
+
+
+/* ============================================================
+   7b. Statistiche GIS
+   ============================================================ */
+var statsBtn = document.getElementById('statistiche-gis-btn');
+var statsPanel = document.getElementById('statistiche-gis');
+var statsCorpo = document.getElementById('statistiche-gis-corpo');
+var statsChiudi = document.getElementById('statistiche-gis-chiudi');
+
+function sistemaPosizioneStatisticheGIS(){
+  /* Parte sempre dalla posizione normale. */
+  statsBtn.style.right = '12px';
+  statsPanel.style.right = '12px';
+
+  var schedaEl = document.getElementById('scheda');
+  if (!schedaEl || !schedaEl.classList.contains('visibile')) return;
+
+  var rBtn = statsBtn.getBoundingClientRect();
+  var rScheda = schedaEl.getBoundingClientRect();
+
+  /* Sposta il pulsante soltanto se i due rettangoli si sovrappongono. */
+  var sovrapposto =
+    rBtn.left < rScheda.right &&
+    rBtn.right > rScheda.left &&
+    rBtn.top < rScheda.bottom &&
+    rBtn.bottom > rScheda.top;
+
+  if (sovrapposto) {
+    var zona = document.getElementById('zona-mappa').getBoundingClientRect();
+    var spazioDestra = zona.right - rScheda.left + 12;
+    statsBtn.style.right = spazioDestra + 'px';
+
+    /* Se si apre anche il pannello statistiche, lo teniamo con il pulsante. */
+    statsPanel.style.right = spazioDestra + 'px';
+  }
+}
+
+window.addEventListener('resize', sistemaPosizioneStatisticheGIS);
+
+function fmtNumero(n, dec){
+  if (!isFinite(n)) return '—';
+  return Number(n).toLocaleString('it-IT',{maximumFractionDigits:dec == null ? 0 : dec});
+}
+function statsLayer(tabella){
+  var layer=layerDaTabella(tabella);
+  return layer ? layer.getSource().getFeatures() : [];
+}
+function statsConteggioVista(tabella){
+  var layer=layerDaTabella(tabella); if (!layer) return 0;
+  var L=layer.get('def'); if (!L || !livelloAcceso[tabella]) return 0;
+  var scala=scalaDa(mappa.getView().getResolution());
+  if (!forzaScala.checked && L.minScale && scala > Number(L.minScale)) return 0;
+  var extent=mappa.getView().calculateExtent(mappa.getSize()), n=0;
+  layer.getSource().forEachFeatureIntersectingExtent(extent,function(f){
+    if (L.field && !acceso[L.table+'|'+f.get(L.field)]) return;
+    n++;
+  });
+  return n;
+}
+function statsTotaleVista(){
+  var n=0;
+  STILE.layers.forEach(function(L){ n += statsConteggioVista(L.table); });
+  return n;
+}
+function statsArea(tabella){
+  var totale=0;
+  statsLayer(tabella).forEach(function(f){
+    var g=f.getGeometry(); if (!g) return;
+    var t=g.getType();
+    if (t==='Polygon' || t==='MultiPolygon') totale += ol.sphere.getArea(g,{projection:'EPSG:3857'});
+  });
+  return totale;
+}
+function statsDistribuzione(tabella,campo){
+  var out={};
+  statsLayer(tabella).forEach(function(f){
+    var v=f.get(campo); v=(v===undefined || v===null || v==='') ? 'Non specificato' : String(v);
+    out[v]=(out[v]||0)+1;
+  });
+  return out;
+}
+function statsTitoloClasse(tabella,valore){
+  var L=definizioneLayer(tabella);
+  if (L && L.rules) {
+    for (var i=0;i<L.rules.length;i++) if (String(L.rules[i].value)===String(valore)) return (L.rules[i].label||valore).replace(/^\(\d+\)\s*/, '');
+  }
+  return valore;
+}
+function statsRigheBarre(items, dec){
+  var max=1; items.forEach(function(x){ if (x.valore>max) max=x.valore; });
+  return items.map(function(x){
+    var p=Math.max(1,Math.round(x.valore/max*100));
+    return '<div class="stats-riga"><span class="nome" title="'+escapeHtml(x.nome)+'">'+escapeHtml(x.nome)+'</span><span class="valore">'+fmtNumero(x.valore,dec)+'</span>'+
+      '<div class="stats-barra"><i style="width:'+p+'%"></i></div></div>';
+  }).join('');
+}
+function escapeHtml(v){
+  return String(v).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; });
+}
+/* Somma per classe: misura = 'area' (ettari), 'lunghezza' (km), nome di un campo numerico, oppure vuoto per il conteggio. */
+function statsSommaPerClasse(tabella, campo, misura){
+  var out={};
+  statsLayer(tabella).forEach(function(f){
+    var v=f.get(campo); v=(v===undefined || v===null || v==='') ? 'Non specificato' : String(v);
+    var x=1, g=f.getGeometry();
+    if (misura==='area') x = g ? ol.sphere.getArea(g,{projection:'EPSG:3857'})/10000 : 0;
+    else if (misura==='lunghezza') x = g ? ol.sphere.getLength(g,{projection:'EPSG:3857'})/1000 : 0;
+    else if (misura) x = Number(f.get(misura)) || 0;
+    out[v]=(out[v]||0)+x;
+  });
+  return out;
+}
+function statsItemsOrdinati(tabella, out){
+  var L=definizioneLayer(tabella), ordine=(L && L.rules ? L.rules : []).map(function(r){ return String(r.value); });
+  return Object.keys(out).sort(function(a,b){
+    var ia=ordine.indexOf(a), ib=ordine.indexOf(b);
+    return (ia<0?99:ia)-(ib<0?99:ib);
+  }).map(function(k){ return {nome:statsTitoloClasse(tabella,k), valore:out[k]}; });
+}
+function statsLunghezza(tabella){
+  var totale=0;
+  statsLayer(tabella).forEach(function(f){
+    var g=f.getGeometry(); if (g) totale += ol.sphere.getLength(g,{projection:'EPSG:3857'});
+  });
+  return totale/1000;
+}
+function aggiornaStatisticheGIS(){
+  if (!statsCorpo) return;
+  var totale=0, layerAccesi=0;
+  STILE.layers.forEach(function(L){
+    var lay=layerDaTabella(L.table);
+    if (lay) totale += lay.getSource().getFeatures().length;
+    if (livelloAcceso[L.table]) layerAccesi++;
+  });
+  var scala=Math.round(scalaDa(mappa.getView().getResolution()));
+  var vista=statsTotaleVista();
+  var principali=[
+    {table:'catasto_particelle',nome:'Particelle catastali'},
+    {table:'unita_volumetriche',nome:'Unità volumetriche'},
+    {table:'civici',nome:'Numeri civici'},
+    {table:'stradario',nome:'Tronchi di stradario'},
+    {table:'targhe_via',nome:'Targhe via'},
+    {table:'po_zonizzazione',nome:'Piano Operativo — zone'},
+    {table:'po_trasformazioni',nome:'Piano Operativo — schede norma'},
+    {table:'pc_pericolosita',nome:'Protezione civile — aree di pericolosità'},
+    {table:'pc_aree_emergenza',nome:'Protezione civile — aree di emergenza'},
+    {table:'pc_strutture',nome:'Protezione civile — strutture'},
+    {table:'pc_punti',nome:'Protezione civile — cancelli e punti critici'},
+    {table:'pc_vie_fuga',nome:'Protezione civile — vie di fuga'}
+  ].map(function(x){ x.valore=statsLayer(x.table).length; return x; });
+
+  var uv=statsItemsOrdinati('unita_volumetriche', statsSommaPerClasse('unita_volumetriche','classe_h'));
+  var st=statsItemsOrdinati('stradario', statsSommaPerClasse('stradario','classe_str'));
+  var po=statsItemsOrdinati('po_zonizzazione', statsSommaPerClasse('po_zonizzazione','zona','area'));
+  var pe=statsItemsOrdinati('pc_pericolosita', statsSommaPerClasse('pc_pericolosita','pericolosita','area'));
+  var cap=statsItemsOrdinati('pc_aree_emergenza', statsSommaPerClasse('pc_aree_emergenza','tipologia','capienza_persone'));
+  var strutt=statsItemsOrdinati('pc_strutture', statsSommaPerClasse('pc_strutture','tipo'));
+
+  var areaUv=statsArea('unita_volumetriche')/10000;
+  var areaStr=statsArea('stradario')/10000;
+  var areaTu=statsArea('po_tu')/10000;
+  var capTot=0; cap.forEach(function(x){ capTot += x.valore; });
+  var kmVie=statsLunghezza('pc_vie_fuga');
+  var catVista=statsConteggioVista('catasto_particelle');
+  var civVista=statsConteggioVista('civici');
+
+  statsCorpo.innerHTML =
+    '<div class="stats-kpi">'+
+      '<div class="stats-card"><span>Elementi totali</span><b>'+fmtNumero(totale)+'</b></div>'+
+      '<div class="stats-card"><span>Nella vista corrente</span><b>'+fmtNumero(vista)+'</b></div>'+
+      '<div class="stats-card"><span>Layer accesi</span><b>'+fmtNumero(layerAccesi)+' / '+fmtNumero(STILE.layers.length)+'</b></div>'+
+      '<div class="stats-card"><span>Scala corrente</span><b>1:'+fmtNumero(scala)+'</b></div>'+
+    '</div>'+
+    '<div class="stats-sezione"><h3>Dati principali</h3>'+statsRigheBarre(principali)+'</div>'+
+    '<div class="stats-sezione"><h3>Indicatori geometrici</h3><div class="stats-due">'+
+      '<div class="stats-metrica"><span>Superficie unità volumetriche</span><b>'+fmtNumero(areaUv,2)+' ha</b></div>'+
+      '<div class="stats-metrica"><span>Superficie stradario</span><b>'+fmtNumero(areaStr,2)+' ha</b></div>'+
+      '<div class="stats-metrica"><span>Territorio urbanizzato</span><b>'+fmtNumero(areaTu,1)+' ha</b></div>'+
+      '<div class="stats-metrica"><span>Vie di fuga</span><b>'+fmtNumero(kmVie,2)+' km</b></div>'+
+      '<div class="stats-metrica"><span>Capienza aree di emergenza</span><b>'+fmtNumero(capTot)+' persone</b></div>'+
+      '<div class="stats-metrica"><span>Particelle / civici nella vista</span><b>'+fmtNumero(catVista)+' / '+fmtNumero(civVista)+'</b></div>'+
+    '</div></div>'+
+    '<div class="stats-sezione"><h3>Piano Operativo — superficie per zona (ha)</h3>'+statsRigheBarre(po,1)+'</div>'+
+    '<div class="stats-sezione"><h3>Protezione civile — superficie per pericolosità (ha)</h3>'+statsRigheBarre(pe,1)+'</div>'+
+    '<div class="stats-sezione"><h3>Protezione civile — capienza per tipo di area (persone)</h3>'+statsRigheBarre(cap)+'</div>'+
+    '<div class="stats-sezione"><h3>Protezione civile — strutture per tipo</h3>'+statsRigheBarre(strutt)+'</div>'+
+    '<div class="stats-sezione"><h3>Unità volumetriche per classe di altezza</h3>'+statsRigheBarre(uv)+'</div>'+
+    '<div class="stats-sezione"><h3>Stradario per classe</h3>'+statsRigheBarre(st)+'</div>'+
+    '<div class="stats-nota">Dati interamente fittizi, generati a scopo dimostrativo. Le statistiche sono calcolate sui dati caricati nel WebGIS; “Nella vista corrente” rispetta layer accesi, classi attive e soglie di scala.</div>';
+}
+function apriStatisticheGIS(){
+  aggiornaStatisticheGIS();
+  statsPanel.classList.add('visibile'); statsPanel.setAttribute('aria-hidden','false');
+  statsBtn.classList.add('attivo'); statsBtn.setAttribute('aria-expanded','true');
+}
+function chiudiStatisticheGIS(){
+  statsPanel.classList.remove('visibile'); statsPanel.setAttribute('aria-hidden','true');
+  statsBtn.classList.remove('attivo'); statsBtn.setAttribute('aria-expanded','false');
+}
+statsBtn.addEventListener('click',function(){
+  if (statsPanel.classList.contains('visibile')) chiudiStatisticheGIS(); else apriStatisticheGIS();
+});
+statsChiudi.addEventListener('click',chiudiStatisticheGIS);
+mappa.on('moveend',function(){ if (statsPanel.classList.contains('visibile')) aggiornaStatisticheGIS(); });
+
+/* ============================================================
+   8. Pannello e avvio
+   ============================================================ */
+var pannello = document.getElementById('pannello');
+var maniglia = document.getElementById('maniglia');
+maniglia.addEventListener('click', function(){
+  pannello.classList.remove('chiuso'); maniglia.classList.remove('visibile');
+  mappa.updateSize();
+});
+document.querySelector('.testata').addEventListener('dblclick', function(){
+  pannello.classList.add('chiuso'); maniglia.classList.add('visibile');
+  mappa.updateSize();
+});
+
+costruisciLegenda();
+
+/* Memorizza centro e zoom della mappa in questo browser */
+var CHIAVE_POSIZIONE_MAPPA = 'webgis_demo_posizione_mappa_v1';
+
+function salvaPosizioneMappa(){
+  var v = mappa.getView();
+  var centro = v.getCenter();
+  var zoom = v.getZoom();
+  if (!centro || !Number.isFinite(zoom)) return;
+  try {
+    localStorage.setItem(CHIAVE_POSIZIONE_MAPPA, JSON.stringify({
+      center: centro,
+      zoom: zoom
+    }));
+  } catch(e) {}
+}
+
+function caricaPosizioneMappa(){
+  try {
+    var stato = JSON.parse(localStorage.getItem(CHIAVE_POSIZIONE_MAPPA) || 'null');
+    if (!stato || !Array.isArray(stato.center) || stato.center.length !== 2 ||
+        !Number.isFinite(stato.center[0]) || !Number.isFinite(stato.center[1]) ||
+        !Number.isFinite(stato.zoom)) return false;
+
+    var v = mappa.getView();
+    v.setCenter(stato.center);
+    v.setZoom(stato.zoom);
+    return true;
+  } catch(e) {
+    return false;
+  }
+}
+
+mappa.on('moveend', salvaPosizioneMappa);
+
+conMisura(function(dim){
+  var v = mappa.getView();
+
+  if (!caricaPosizioneMappa()) {
+    v.fit(estensione3857, {size: dim, padding: [30, 30, 30, 30]});
+    if (SOGLIA > 0 && scalaDa(v.getResolution()) > SOGLIA) {
+      if (typeof CENTRO_AVVIO !== 'undefined') v.setCenter(CENTRO_AVVIO);
+      v.setResolution(SOGLIA * 0.9 / PX_PER_M);
+    }
+  }
+
+  aggiornaStato();
+});
+
+})();
+</script>
+</body>
+</html>

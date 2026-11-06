@@ -1,0 +1,25 @@
+.meridiana-page h1 { max-width:18ch; font-size:clamp(2.3rem,4.6vw,4.3rem); line-height:1.08; }
+.meridiana-intro { padding-top:3.5rem; }
+.meridiana-grid { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr); gap:3rem; align-items:center; }
+.meridiana-caption { color:var(--muted); font-size:.85rem; margin-top:1rem; }
+.meridiana-summary { padding:2rem; border-radius:24px; background:linear-gradient(145deg,#0f2f4f,#17483f); color:#fff; }
+.meridiana-summary .eyebrow { color:#b0e8ce; }
+.meridiana-summary ol { padding:0; margin:0; list-style:none; }
+.meridiana-summary li { display:flex; gap:1rem; padding:1.4rem 0; border-bottom:1px solid #ffffff30; }
+.meridiana-summary li:last-child { border:0; }
+.meridiana-summary li>span { font-size:.85rem; color:#b0e8ce; padding-top:.25rem; }
+.meridiana-summary strong { font-size:1.4rem; }
+.meridiana-summary p { margin:.4rem 0 0; color:#d5e8e2; }
+.meridiana-cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1.3rem; }
+.meridiana-card { padding:1.8rem; border:1px solid var(--border); border-radius:22px; background:#fff; }
+.meridiana-card p { color:var(--muted); }
+.meridiana-card p:last-child { margin-bottom:0; }
+.meridiana-steps { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:2.5rem; padding-left:1.5rem; }
+.meridiana-steps li { padding-left:.5rem; }
+.meridiana-steps li::marker { color:var(--accent); font-weight:800; }
+.meridiana-guide-note { margin-top:2rem; padding:1.6rem; border-left:4px solid var(--accent); background:#e9f3f0; border-radius:0 16px 16px 0; }
+.meridiana-guide-note p { margin-bottom:0; }
+.meridiana-final { padding:2.5rem; background:#e9f3f0; border-radius:24px; }
+.meridiana-page a:focus-visible { outline:3px solid var(--accent); outline-offset:4px; }
+@media(max-width:900px) { .meridiana-grid,.meridiana-cards,.meridiana-steps { grid-template-columns:1fr; } .meridiana-grid { gap:1.5rem; } .meridiana-steps { gap:1rem; } }
+@media(max-width:560px) { .meridiana-summary,.meridiana-card,.meridiana-final { padding:1.4rem; } .meridiana-intro { padding-top:2rem; } .meridiana-page .hero-actions { align-items:stretch; } }

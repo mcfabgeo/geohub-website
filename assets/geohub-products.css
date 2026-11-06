@@ -1,0 +1,9 @@
+.geohub-products { margin-top:2rem; padding-top:1.8rem; border-top:1px solid #dce7e4; }
+.geohub-products h3 { color:#17483f; margin:0 0 .6rem; }
+.geohub-products>p { color:var(--muted); }
+.geohub-product { display:flex; flex-direction:column; gap:.8rem; max-width:540px; padding:1.6rem; border:1px solid #c4dcd3; border-radius:18px; background:linear-gradient(135deg,#e9f3f0,#f8fbfa); color:var(--text); transition:border-color .2s,box-shadow .2s; }
+.geohub-product-label { color:#17483f; font-size:1.6rem; font-weight:800; }
+.geohub-product strong { color:#17483f; }
+.geohub-product:hover { border-color:#1e8a63; box-shadow:0 10px 24px #17483f14; }
+.geohub-product:focus-visible { outline:3px solid #1e8a63; outline-offset:4px; }
+@media(max-width:560px) { .geohub-product { padding:1.2rem; } }
